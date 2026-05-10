@@ -1,0 +1,13 @@
+build/
+out/
+bin/
+
+.vs/
+*.user/
+
+.idea/
+cmake-build-*/
+
+*.exe
+*.dll
+*.log
