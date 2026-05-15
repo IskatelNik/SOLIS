@@ -35,7 +35,7 @@ FetchContent_MakeAvailable(SFML)
 # 3. Добавляем наш исполняемый файл
 add_executable(SOLIS 
     src/main.cpp
- "include/Utils/GameConstans.h")
+ "include/Utils/GameConstans.h" "include/Core/Events.h" "include/Core/EventBus.h")
 
 # 4. Указываем папки с заголовочными файлами (пока это src и include)
 target_include_directories(SOLIS PRIVATE src include)
