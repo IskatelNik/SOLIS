@@ -38,7 +38,7 @@ add_executable(SOLIS
  "include/Utils/GameConstans.h" "include/Core/Events.h" "include/Core/EventBus.h"
  "include/Data/ResourceManager.h" "src/Data/ResourceManager.cpp" "include/Data/DataDefs.h"
  "include/Data/DataLoader.h" "src/Data/DataLoader.cpp" "include/Data/SaveProfile.h" "src/Data/SaveManager.cpp"
- "include/Data/SaveManager.h")
+ "include/Data/SaveManager.h" "include/Gameplay/Player.h" "src/Gameplay/Player.cpp" "include/Gameplay/Enemy.h" "src/Gameplay/Enemy.cpp" "src/Gameplay/CombatSystem.cpp" "include/Gameplay/RunManager.h" "src/Gameplay/RunManager.cpp")
 
 # 4. Указываем папки с заголовочными файлами (пока это src и include)
 target_include_directories(SOLIS PRIVATE src include)
