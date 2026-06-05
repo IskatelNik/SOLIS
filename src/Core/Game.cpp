@@ -1,6 +1,8 @@
 #include "Core/Game.h"
-#include "States/MainMenuState.h"
+#include "States/ExplorationState.h"
 #include "Core/ResourceManager.h"
+#include "Managers/DataManager.h"
+#include "Managers/RunManager.h"
 #include <iostream>
 
 namespace solis {
@@ -10,12 +12,18 @@ Game::Game(const std::string& title, unsigned int width, unsigned int height)
     
     // Загружаем шрифт по умолчанию
     if (!ResourceManager::getInstance().loadFont("main", "assets/fonts/font_main.ttf")) {
-        // Если шрифта нет, MVP 0 может не отрисовать текст, но не должна падать.
         std::cerr << "[Game] Warning: Default font not found at assets/fonts/font_main.ttf" << std::endl;
     }
 
+    // Загружаем базу комнат (MVP 1)
+    if (!DataManager::getInstance().loadRooms("data/rooms.json")) {
+        std::cerr << "[Game] Critical: Failed to load rooms.json" << std::endl;
+    }
+
+    RunManager::getInstance().startNewRun();
+
     // Устанавливаем начальное состояние
-    m_stateMachine.pushState(std::make_unique<MainMenuState>(m_window, m_stateMachine));
+    m_stateMachine.pushState(std::make_unique<ExplorationState>(m_window, m_stateMachine));
 }
 
 void Game::run() {
