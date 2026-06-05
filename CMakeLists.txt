@@ -33,11 +33,15 @@ set(SFML_BUILD_DOC OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(SFML)
 
 # 3. Добавляем наш исполняемый файл
-add_executable(SOLIS 
-    src/main.cpp
- "include/Utils/GameConstans.h")
+file(GLOB_RECURSE PROJECT_SOURCES 
+    "src/*.cpp"
+    "include/*.h"
+    "include/*.hpp"
+)
 
-# 4. Указываем папки с заголовочными файлами (пока это src и include)
+add_executable(SOLIS ${PROJECT_SOURCES})
+
+# 4. Указываем папки с заголовочными файлами
 target_include_directories(SOLIS PRIVATE src include)
 
 # 5. Линкуем библиотеки (модули SFML и JSON)
@@ -46,4 +50,19 @@ target_link_libraries(SOLIS PRIVATE
     SFML::Window 
     SFML::System 
     nlohmann_json::nlohmann_json
+)
+
+# 6. Копируем ресурсы в папку сборки
+add_custom_command(TARGET SOLIS POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/assets"
+        "$<TARGET_FILE_DIR:SOLIS>/assets"
+    COMMENT "Copying assets to build directory..."
+)
+
+add_custom_command(TARGET SOLIS POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/data"
+        "$<TARGET_FILE_DIR:SOLIS>/data"
+    COMMENT "Copying data to build directory..."
 )
