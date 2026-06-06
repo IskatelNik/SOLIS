@@ -1,7 +1,10 @@
 #include "States/ExplorationState.h"
+#include "States/CombatState.h"
 #include "Core/ResourceManager.h"
 #include "Managers/RunManager.h"
+#include "Managers/DataManager.h"
 #include <string>
+#include <random>
 
 namespace solis {
 
@@ -96,10 +99,24 @@ void ExplorationState::handleInput() {
             const sf::Font& font = ResourceManager::getInstance().getFont("main");
             m_mainDisplay->setText(sf::String::fromUtf8(selectedRoom.description.begin(), selectedRoom.description.end()), font, 22, sf::Color::White);
             
-            std::string prompt = "[Space] Продолжить...";
-            m_actionMenu->setText(sf::String::fromUtf8(prompt.begin(), prompt.end()), font, 24, sf::Color::Yellow);
-            
             RunManager::getInstance().moveToRoom(selectedRoom);
+
+            if (selectedRoom.type == "combat") {
+                if (!selectedRoom.possible_enemies.empty()) {
+                    static std::random_device rd;
+                    static std::mt19937 gen(rd());
+                    std::uniform_int_distribution<> dis(0, static_cast<int>(selectedRoom.possible_enemies.size()) - 1);
+                    m_pendingEnemyId = selectedRoom.possible_enemies[dis(gen)];
+                    
+                    std::string prompt = "[Space] ВСТУПИТЬ В БОЙ";
+                    m_actionMenu->setText(sf::String::fromUtf8(prompt.begin(), prompt.end()), font, 24, sf::Color::Red);
+                }
+            } else {
+                m_pendingEnemyId = "";
+                std::string prompt = "[Space] Продолжить...";
+                m_actionMenu->setText(sf::String::fromUtf8(prompt.begin(), prompt.end()), font, 24, sf::Color::Yellow);
+            }
+
             m_isShowingDescription = true;
             m_awaitingChoice = false;
         }
@@ -107,7 +124,20 @@ void ExplorationState::handleInput() {
     else if (m_isShowingDescription && spacePressed) {
         keyHeld = true;
         m_isShowingDescription = false;
-        generateNextStep();
+
+        if (!m_pendingEnemyId.empty()) {
+            auto enemy = DataManager::getInstance().spawnEnemy(m_pendingEnemyId);
+            m_pendingEnemyId = ""; // Сбрасываем перед входом
+            if (enemy) {
+                m_stateMachine.pushState(std::make_unique<CombatState>(m_window, m_stateMachine, std::move(enemy)));
+                // generateNextStep() вызовется автоматически при возврате в это состояние, 
+                // если мы добавим проверку в update или перенесем логику.
+                // Но проще всего сгенерировать новые двери СРАЗУ, чтобы они ждали игрока после боя.
+                generateNextStep(); 
+            }
+        } else {
+            generateNextStep();
+        }
     }
 }
 

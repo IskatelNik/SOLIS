@@ -32,6 +32,7 @@ private:
     std::vector<Room> m_currentOptions;
     bool m_awaitingChoice = true;
     bool m_isShowingDescription = false;
+    std::string m_pendingEnemyId;
 };
 
 } // namespace solis

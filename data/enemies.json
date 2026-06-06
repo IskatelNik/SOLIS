@@ -1,0 +1,39 @@
+{
+  "enemies": [
+    {
+      "id": "enemy_guard",
+      "name": "Рядовой Стражник",
+      "ascii_art": "data/ascii/guard.txt",
+      "max_hp": 50,
+      "base_damage": 8,
+      "sparks_reward": 10,
+      "possible_traits": [
+        {
+          "trait": 1,
+          "trait_name_hidden": "Исполнительный",
+          "intro_text": "Стражник стоит по стойке смирно. Для него вы — лишь нарушитель регламента."
+        },
+        {
+          "trait": 6,
+          "trait_name_hidden": "Измученный",
+          "intro_text": "Стражник с трудом держит дубинку. Он опирается на стену, чтобы не упасть."
+        }
+      ]
+    },
+    {
+      "id": "enemy_dog",
+      "name": "Механический Пес",
+      "ascii_art": "data/ascii/dog.txt",
+      "max_hp": 30,
+      "base_damage": 12,
+      "sparks_reward": 5,
+      "possible_traits": [
+        {
+          "trait": 0,
+          "trait_name_hidden": "Фанатичный",
+          "intro_text": "Глаза пса горят красным. Он запрограммирован только на одно — уничтожение."
+        }
+      ]
+    }
+  ]
+}

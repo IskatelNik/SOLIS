@@ -40,7 +40,6 @@ void UIBox::wrapText(const sf::String& text, const sf::Font& font, unsigned int 
 
         tempText.setString(currentLine + charStr);
         if (tempText.getLocalBounds().size.x > maxWidth) {
-            // Ищем последний пробел для переноса по словам
             size_t lastSpace = std::string::npos;
             for (size_t i = 0; i < currentLine.getSize(); ++i) {
                 if (currentLine[i] == ' ') lastSpace = i;
@@ -50,7 +49,6 @@ void UIBox::wrapText(const sf::String& text, const sf::Font& font, unsigned int 
                 result += currentLine.substring(0, lastSpace) + "\n";
                 currentLine = currentLine.substring(lastSpace + 1) + charStr;
             } else {
-                // Если пробелов нет, переносим по символам
                 result += currentLine + "\n";
                 currentLine = charStr;
             }
@@ -63,8 +61,21 @@ void UIBox::wrapText(const sf::String& text, const sf::Font& font, unsigned int 
     m_text->setPosition(m_shape.getPosition() + m_padding);
 }
 
+void UIBox::setProgressBar(float percentage, sf::Color color) {
+    m_hasBar = true;
+    m_barPercentage = std::max(0.0f, std::min(1.0f, percentage));
+    
+    float barMaxWidth = m_shape.getSize().x - (m_padding.x * 2.f);
+    m_bar.setSize({barMaxWidth * m_barPercentage, 15.f});
+    m_bar.setFillColor(color);
+}
+
 void UIBox::render(sf::RenderWindow& window) {
     window.draw(m_shape);
+    if (m_hasBar) {
+        m_bar.setPosition(m_shape.getPosition() + sf::Vector2f(m_padding.x, m_shape.getSize().y - 25.f));
+        window.draw(m_bar);
+    }
     if (m_text) {
         window.draw(*m_text);
     }

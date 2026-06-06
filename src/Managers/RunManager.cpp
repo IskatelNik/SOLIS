@@ -1,4 +1,5 @@
 #include "Managers/RunManager.h"
+#include "Managers/DataManager.h"
 #include <algorithm>
 #include <random>
 
@@ -9,9 +10,17 @@ RunManager& RunManager::getInstance() {
     return instance;
 }
 
+RunManager::RunManager() {}
+
 void RunManager::startNewRun() {
     m_currentLevel = 1;
     m_currentRoomIndex = 0;
+    m_player = Player();
+    
+    // В MVP 2 даем игроку все загруженные навыки для теста
+    for (auto const& [id, skill] : DataManager::getInstance().getSkills()) {
+        m_player.addSkill(skill);
+    }
 }
 
 std::vector<Room> RunManager::getNextRoomOptions() {
