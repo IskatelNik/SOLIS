@@ -20,6 +20,15 @@ public:
     int getCurrentRoomIndex() const { return m_currentRoomIndex; }
 
     Player& getPlayer() { return m_player; }
+    
+    // MVP 3: Lore & Empathy
+    void unlockLore(const std::string& id);
+    bool isLoreUnlocked(const std::string& id) const;
+    const std::vector<std::string>& getUnlockedLore() const { return m_unlockedLore; }
+
+    int getEmpathyForTrait(Trait t) const;
+    void addEmpathy(int amount);
+    int getTotalEmpathy() const { return m_totalEmpathy; }
 
 private:
     RunManager();
@@ -30,6 +39,9 @@ private:
     int m_currentLevel = 1;
     int m_currentRoomIndex = 0;
     Player m_player;
+
+    std::vector<std::string> m_unlockedLore;
+    int m_totalEmpathy = 0;
 };
 
 } // namespace solis

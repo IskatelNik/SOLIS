@@ -7,6 +7,7 @@
       "max_hp": 50,
       "base_damage": 8,
       "sparks_reward": 10,
+      "empathy_reveal_threshold": 15,
       "possible_traits": [
         {
           "trait": 1,
@@ -27,6 +28,7 @@
       "max_hp": 30,
       "base_damage": 12,
       "sparks_reward": 5,
+      "empathy_reveal_threshold": 30,
       "possible_traits": [
         {
           "trait": 0,

@@ -41,6 +41,7 @@ public:
     Trait getTrait() const { return m_trait; }
     const std::string& getTraitNameHidden() const { return m_traitNameHidden; }
     const std::string& getIntroText() const { return m_introText; }
+    int getEmpathyRevealThreshold() const { return m_empathyRevealThreshold; }
 
     // Setters
     void setId(const std::string& id) { m_id = id; }
@@ -56,6 +57,7 @@ public:
 
     void setDefenseModifier(float mod) { m_defenseModifier = mod; }
     void setDamageModifier(float mod) { m_damageModifier = mod; }
+    void setEmpathyRevealThreshold(int val) { m_empathyRevealThreshold = val; }
 
     bool isDrainable() const { return m_isDrainable; }
     void setDrainable(bool drainable) { m_isDrainable = drainable; }
@@ -75,7 +77,8 @@ private:
     float m_damageModifier = 1.0f;
     float m_defenseModifier = 1.0f;
 
-    bool m_isDrainable = true; // MVP 2 Update
+    int m_empathyRevealThreshold = 20; 
+    bool m_isDrainable = true; 
 
     std::vector<StatusEffect> m_activeEffects;
 };

@@ -6,9 +6,11 @@
 #include "UI/UIBox.h"
 #include "Entities/Enemy.h"
 #include "Entities/Player.h"
+#include "Mechanics/DialogueGenerator.h"
 #include <memory>
 #include <string>
 #include <list>
+#include <vector>
 
 namespace solis {
 
@@ -49,9 +51,11 @@ private:
 
     CombatMenu m_currentMenu = CombatMenu::Main;
     int m_selectedSkillIndex = -1;
+    std::vector<DialogueGenerator::DialogueOption> m_dialogueOptions;
     std::list<std::string> m_logs;
     bool m_playerTurn = true;
     bool m_isCombatOver = false;
+    bool m_isSocialVictory = false; // MVP 3 Fix
     bool m_keyHeld = false;
 };
 

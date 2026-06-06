@@ -16,6 +16,11 @@ public:
     void addHeat(float amount);
     void reduceHeat(float amount);
 
+    // Эмпатия (MVP 3 Update)
+    int getEmpathy() const { return m_empathyLevel; }
+    void addEmpathy(int amount) { m_empathyLevel += amount; }
+    void setEmpathy(int val) { m_empathyLevel = val; }
+
     // Getters
     int getMaxHp() const { return m_maxHp; }
     int getCurrentHp() const { return m_currentHp; }
@@ -33,7 +38,6 @@ private:
     int m_empathyLevel = 0;
 
     std::vector<Skill> m_activeSkills;
-    // std::vector<Artifact*> m_artifacts; // Future MVP
 };
 
 } // namespace solis

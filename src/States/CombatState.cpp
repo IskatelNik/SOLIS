@@ -55,6 +55,7 @@ void CombatState::updateUI() {
     std::stringstream pss;
     pss << "HP: " << m_player.getCurrentHp() << "/" << m_player.getMaxHp() << "\n";
     pss << "HEAT: " << (int)m_player.getHeat() << "%";
+    pss << "\nEMP: " << m_player.getEmpathy();
     std::string pStr = pss.str();
     m_playerStatus->setText(sf::String::fromUtf8(pStr.begin(), pStr.end()), font, 22, sf::Color::White);
     
@@ -65,7 +66,13 @@ void CombatState::updateUI() {
     ess << m_enemy->getName() << "\n\n";
     ess << "HP: " << m_enemy->getCurrentHp() << "/" << m_enemy->getMaxHp() << "\n";
     ess << "DEF MOD: " << std::fixed << std::setprecision(2) << m_enemy->getDefenseModifier() << "\n";
-    ess << "Trait: ???";
+    
+    std::string traitName = "???";
+    if (m_player.getEmpathy() >= m_enemy->getEmpathyRevealThreshold()) {
+        traitName = m_enemy->getTraitNameHidden();
+    }
+    ess << "Trait: " << traitName;
+
     std::string enemyStr = ess.str();
     m_enemyDisplay->setText(sf::String::fromUtf8(enemyStr.begin(), enemyStr.end()), font, 20, sf::Color::White);
 
@@ -73,7 +80,7 @@ void CombatState::updateUI() {
     if (m_isCombatOver) {
         menuText = "[Space] Продолжить...";
     } else if (m_currentMenu == CombatMenu::Main) {
-        menuText = "[1] Атака\n[2] Манипуляция\n[3] Договориться (Недоступно)";
+        menuText = "[1] Атака\n[2] Манипуляция\n[3] Договориться";
     } else if (m_currentMenu == CombatMenu::Attack) {
         const auto& skills = m_player.getActiveSkills();
         for (size_t i = 0; i < skills.size(); ++i) {
@@ -90,6 +97,11 @@ void CombatState::updateUI() {
         menuText = skill.name + "\n" + skill.description + "\n";
         menuText += "УРОН (актуальный): " + std::to_string(estDmg) + " | + ЖАР: " + std::to_string((int)skill.heat_cost_added) + "%\n";
         menuText += "[1] ПОДТВЕРДИТЬ\n[0] Отмена";
+    } else if (m_currentMenu == CombatMenu::Negotiate) {
+        for (size_t i = 0; i < m_dialogueOptions.size(); ++i) {
+            menuText += "[" + std::to_string(i + 1) + "] " + m_dialogueOptions[i].text + "\n";
+        }
+        menuText += "[0] Назад";
     } else if (m_currentMenu == CombatMenu::Manipulation) {
         std::string drainStatus = m_enemy->isDrainable() ? "(Доступно)" : "(Пуст)";
         menuText = "[1] Поглотить (+15% HEAT, -0.2 DEF) " + drainStatus + "\n[2] Отдать (-20% HEAT, Heal)\n[0] Назад";
@@ -105,6 +117,7 @@ void CombatState::handleInput() {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num1)) { anyNum = true; num = 1; }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num2)) { anyNum = true; num = 2; }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num3)) { anyNum = true; num = 3; }
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num4)) { anyNum = true; num = 4; }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num0)) { anyNum = true; num = 0; }
     
     bool space = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space);
@@ -114,7 +127,7 @@ void CombatState::handleInput() {
     m_keyHeld = true;
 
     if (m_isCombatOver) {
-        if (space) endCombat(m_enemy->getCurrentHp() <= 0);
+        if (space) endCombat(m_enemy->getCurrentHp() <= 0 || m_isSocialVictory);
         return;
     }
 
@@ -123,6 +136,10 @@ void CombatState::handleInput() {
     if (m_currentMenu == CombatMenu::Main) {
         if (num == 1) m_currentMenu = CombatMenu::Attack;
         else if (num == 2) m_currentMenu = CombatMenu::Manipulation;
+        else if (num == 3) {
+            m_dialogueOptions = DialogueGenerator::generateOptions(m_enemy->getTrait(), RunManager::getInstance().getCurrentLevel());
+            m_currentMenu = CombatMenu::Negotiate;
+        }
     } else if (m_currentMenu == CombatMenu::Attack) {
         if (num == 0) m_currentMenu = CombatMenu::Main;
         else {
@@ -146,6 +163,28 @@ void CombatState::handleInput() {
             m_currentMenu = CombatMenu::Main;
         } else if (num == 0) {
             m_currentMenu = CombatMenu::Attack;
+        }
+    } else if (m_currentMenu == CombatMenu::Negotiate) {
+        if (num == 0) m_currentMenu = CombatMenu::Main;
+        else if (num > 0 && (size_t)num <= m_dialogueOptions.size()) {
+            const auto& opt = m_dialogueOptions[num - 1];
+            if (opt.isCorrect) {
+                logMessage("Вы подобрали верные слова! Враг опускает оружие.");
+                m_player.addEmpathy(10);
+                m_isSocialVictory = true;
+                m_isCombatOver = true;
+            } else if (opt.isNeutral) {
+                logMessage("Ваши слова не трогают врага. Он игнорирует вас.");
+                m_player.addEmpathy(5);
+                m_playerTurn = false;
+                m_currentMenu = CombatMenu::Main;
+            } else {
+                logMessage("Ваши слова ввергают врага в ярость!");
+                m_enemy->setDamageModifier(m_enemy->getDamageModifier() + 0.3f);
+                m_player.addEmpathy(2);
+                m_playerTurn = false;
+                m_currentMenu = CombatMenu::Main;
+            }
         }
     } else if (m_currentMenu == CombatMenu::Manipulation) {
         if (num == 0) m_currentMenu = CombatMenu::Main;

@@ -15,10 +15,11 @@ Game::Game(const std::string& title, unsigned int width, unsigned int height)
         std::cerr << "[Game] Warning: Default font not found at assets/fonts/font_main.ttf" << std::endl;
     }
 
-    // Загружаем базы данных (MVP 1 & 2)
+    // Загружаем базы данных (MVP 1 & 2 & 3)
     DataManager::getInstance().loadRooms("data/rooms.json");
     DataManager::getInstance().loadEnemies("data/enemies.json");
     DataManager::getInstance().loadSkills("data/skills.json");
+    DataManager::getInstance().loadLore("data/lore.json");
 
     RunManager::getInstance().startNewRun();
 
