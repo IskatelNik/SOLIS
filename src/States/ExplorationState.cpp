@@ -3,6 +3,7 @@
 #include "Core/ResourceManager.h"
 #include "Managers/RunManager.h"
 #include "Managers/DataManager.h"
+#include "Utils/GameConstans.h"
 #include <string>
 #include <random>
 #include <sstream>
@@ -21,25 +22,25 @@ void ExplorationState::init() {
 
     m_topBar = std::make_unique<UIBox>(
         sf::Vector2f(0.f, 0.f),
-        sf::Vector2f(w, h * 0.1f),
-        sf::Color(30, 30, 30),
-        sf::Color::White,
+        sf::Vector2f(w, h * constants::UI_TOPBAR_HEIGHT),
+        constants::COLOR_UI_BG_LIGHT,
+        constants::COLOR_UI_OUTLINE,
         -2.f
     );
 
     m_mainDisplay = std::make_unique<UIBox>(
-        sf::Vector2f(0.f, h * 0.1f),
-        sf::Vector2f(w, h * 0.55f),
+        sf::Vector2f(0.f, h * constants::UI_TOPBAR_HEIGHT),
+        sf::Vector2f(w, h * constants::UI_MAIN_DISPLAY_HEIGHT),
         sf::Color::Black,
-        sf::Color::White,
+        constants::COLOR_UI_OUTLINE,
         -2.f
     );
 
     m_actionMenu = std::make_unique<UIBox>(
-        sf::Vector2f(0.f, h * 0.65f),
-        sf::Vector2f(w, h * 0.35f),
-        sf::Color(20, 20, 20),
-        sf::Color::White,
+        sf::Vector2f(0.f, h * (constants::UI_TOPBAR_HEIGHT + constants::UI_MAIN_DISPLAY_HEIGHT)),
+        sf::Vector2f(w, h * constants::UI_ACTION_MENU_HEIGHT),
+        constants::COLOR_UI_BG_DARK,
+        constants::COLOR_UI_OUTLINE,
         -2.f
     );
 
@@ -123,7 +124,7 @@ void ExplorationState::handleInput() {
                     std::uniform_int_distribution<> dis(0, static_cast<int>(available.size()) - 1);
                     m_discoveredLoreId = available[dis(gen)];
                     const auto& lore = allLore.at(m_discoveredLoreId);
-                    m_mainDisplay->setText(sf::String::fromUtf8(lore.pickup_text.begin(), lore.pickup_text.end()), font, 22, sf::Color::Cyan);
+                    m_mainDisplay->setText(sf::String::fromUtf8(lore.pickup_text.begin(), lore.pickup_text.end()), font, 22, constants::COLOR_LORE_DISCOVERY);
                     RunManager::getInstance().unlockLore(m_discoveredLoreId);
                 } else {
                     std::string msg = "АРХИВ ПУСТ\n\nЗдесь больше нечего искать.";
@@ -155,8 +156,8 @@ void ExplorationState::handleInput() {
             if (termChoice == 1) {
                 keyHeld = true;
                 Player& player = RunManager::getInstance().getPlayer();
-                float heatVented = player.getHeat() * 0.9f;
-                int healAmount = (int)(player.getMaxHp() * 0.15f);
+                float heatVented = player.getHeat() * constants::TERMINAL_HEAT_VENT_PERCENT;
+                int healAmount = (int)(player.getMaxHp() * constants::TERMINAL_HEAL_PERCENT);
                 player.reduceHeat(heatVented);
                 player.heal(healAmount);
 
@@ -164,7 +165,7 @@ void ExplorationState::handleInput() {
                 std::stringstream ss;
                 ss << "СБРОШЕНО ЖАРА: " << (int)heatVented << "%\nВОССТАНОВЛЕНО HP: " << healAmount;
                 std::string msg = ss.str();
-                m_mainDisplay->setText(sf::String::fromUtf8(msg.begin(), msg.end()), font, 22, sf::Color::Cyan);
+                m_mainDisplay->setText(sf::String::fromUtf8(msg.begin(), msg.end()), font, 22, constants::COLOR_LORE_DISCOVERY);
                 std::string prompt = "[Space] Продолжить...";
                 m_actionMenu->setText(sf::String::fromUtf8(prompt.begin(), prompt.end()), font, 24, sf::Color::Yellow);
                 m_pendingTerminalRoom = nullptr;

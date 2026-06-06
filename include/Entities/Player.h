@@ -4,6 +4,7 @@
 #include <vector>
 #include "Mechanics/Skill.h"
 #include "Mechanics/StatusEffect.h"
+#include "Utils/GameConstans.h"
 
 namespace solis {
 
@@ -32,8 +33,8 @@ public:
     void addSkill(const Skill& skill) { m_activeSkills.push_back(skill); }
 
 private:
-    int m_maxHp = 100;
-    int m_currentHp = 100;
+    int m_maxHp = constants::PLAYER_DEFAULT_MAX_HP;
+    int m_currentHp = constants::PLAYER_DEFAULT_MAX_HP;
     float m_heat = 0.0f;
     int m_empathyLevel = 0;
 

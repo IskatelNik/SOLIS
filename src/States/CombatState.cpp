@@ -1,6 +1,7 @@
 #include "States/CombatState.h"
 #include "Core/ResourceManager.h"
 #include "Managers/RunManager.h"
+#include "Utils/GameConstans.h"
 #include <sstream>
 #include <iomanip>
 
@@ -17,16 +18,17 @@ void CombatState::init() {
 
     const sf::Font& font = ResourceManager::getInstance().getFont("main");
 
-    m_topBar = std::make_unique<UIBox>(sf::Vector2f(0,0), sf::Vector2f(w, h*0.1f), sf::Color(30,30,30), sf::Color::White, -2.f);
-    m_logDisplay = std::make_unique<UIBox>(sf::Vector2f(0, h*0.1f), sf::Vector2f(w*0.7f, h*0.55f), sf::Color(10,10,10), sf::Color::White, -2.f);
-    m_enemyDisplay = std::make_unique<UIBox>(sf::Vector2f(w*0.7f, h*0.1f), sf::Vector2f(w*0.3f, h*0.55f), sf::Color(20,20,20), sf::Color::White, -2.f);
+    // Layout from Constants
+    m_topBar = std::make_unique<UIBox>(sf::Vector2f(0,0), sf::Vector2f(w, h * constants::UI_TOPBAR_HEIGHT), constants::COLOR_UI_BG_LIGHT, constants::COLOR_UI_OUTLINE, -2.f);
+    m_logDisplay = std::make_unique<UIBox>(sf::Vector2f(0, h * constants::UI_TOPBAR_HEIGHT), sf::Vector2f(w * 0.7f, h * constants::UI_MAIN_DISPLAY_HEIGHT), sf::Color::Black, constants::COLOR_UI_OUTLINE, -2.f);
+    m_enemyDisplay = std::make_unique<UIBox>(sf::Vector2f(w * 0.7f, h * constants::UI_TOPBAR_HEIGHT), sf::Vector2f(w * 0.3f, h * constants::UI_MAIN_DISPLAY_HEIGHT), constants::COLOR_UI_BG_DARK, constants::COLOR_UI_OUTLINE, -2.f);
     
-    m_actionMenu = std::make_unique<UIBox>(sf::Vector2f(0, h*0.65f), sf::Vector2f(w*0.7f, h*0.35f), sf::Color(20,20,20), sf::Color::White, -2.f);
-    m_playerStatus = std::make_unique<UIBox>(sf::Vector2f(w*0.7f, h*0.65f), sf::Vector2f(w*0.3f, h*0.35f), sf::Color(15,15,15), sf::Color::White, -2.f);
+    m_actionMenu = std::make_unique<UIBox>(sf::Vector2f(0, h * (constants::UI_TOPBAR_HEIGHT + constants::UI_MAIN_DISPLAY_HEIGHT)), sf::Vector2f(w * constants::UI_ACTION_SPLIT_LEFT, h * constants::UI_ACTION_MENU_HEIGHT), constants::COLOR_UI_BG_DARK, constants::COLOR_UI_OUTLINE, -2.f);
+    m_playerStatus = std::make_unique<UIBox>(sf::Vector2f(w * constants::UI_ACTION_SPLIT_LEFT, h * (constants::UI_TOPBAR_HEIGHT + constants::UI_MAIN_DISPLAY_HEIGHT)), sf::Vector2f(w * constants::UI_ACTION_SPLIT_RIGHT, h * constants::UI_ACTION_MENU_HEIGHT), sf::Color(15,15,15), constants::COLOR_UI_OUTLINE, -2.f);
 
     logMessage(m_enemy->getIntroText());
     
-    if (m_player.getHeat() >= 100.0f) {
+    if (m_player.getHeat() >= constants::HEAT_MAX) {
         logMessage("КРИТИЧЕСКИЙ ПЕРЕГРЕВ! Вы сгораете заживо...");
         m_player.takeDamage(999);
         checkEndCombat();
@@ -59,8 +61,8 @@ void CombatState::updateUI() {
     std::string pStr = pss.str();
     m_playerStatus->setText(sf::String::fromUtf8(pStr.begin(), pStr.end()), font, 22, sf::Color::White);
     
-    sf::Color heatColor = (m_player.getHeat() > 85.0f) ? sf::Color::Red : sf::Color::Yellow;
-    m_playerStatus->setProgressBar(m_player.getHeat() / 100.0f, heatColor);
+    sf::Color heatColor = (m_player.getHeat() > constants::HEAT_OVERLOAD_THRESHOLD) ? constants::COLOR_HEAT_OVERLOAD : constants::COLOR_HEAT_NORMAL;
+    m_playerStatus->setProgressBar(m_player.getHeat() / constants::HEAT_MAX, heatColor);
 
     std::stringstream ess;
     ess << m_enemy->getName() << "\n\n";
@@ -91,7 +93,7 @@ void CombatState::updateUI() {
         const auto& skills = m_player.getActiveSkills();
         const auto& skill = skills[m_selectedSkillIndex];
         
-        float heatMultiplier = 1.0f + (m_player.getHeat() / 100.0f);
+        float heatMultiplier = 1.0f + (m_player.getHeat() / constants::HEAT_MAX);
         int estDmg = (int)(skill.base_damage * heatMultiplier * m_enemy->getDefenseModifier());
 
         menuText = skill.name + "\n" + skill.description + "\n";
@@ -152,7 +154,7 @@ void CombatState::handleInput() {
     } else if (m_currentMenu == CombatMenu::ConfirmSkill) {
         if (num == 1) {
             const auto& skill = m_player.getActiveSkills()[m_selectedSkillIndex];
-            float heatMultiplier = 1.0f + (m_player.getHeat() / 100.0f);
+            float heatMultiplier = 1.0f + (m_player.getHeat() / constants::HEAT_MAX);
             int dmg = (int)(skill.base_damage * heatMultiplier * m_enemy->getDefenseModifier());
             
             m_enemy->takeDamage(dmg);
@@ -170,18 +172,18 @@ void CombatState::handleInput() {
             const auto& opt = m_dialogueOptions[num - 1];
             if (opt.isCorrect) {
                 logMessage("Вы подобрали верные слова! Враг опускает оружие.");
-                m_player.addEmpathy(10);
+                m_player.addEmpathy(constants::EMPATHY_REWARD_CORRECT);
                 m_isSocialVictory = true;
                 m_isCombatOver = true;
             } else if (opt.isNeutral) {
                 logMessage("Ваши слова не трогают врага. Он игнорирует вас.");
-                m_player.addEmpathy(5);
+                m_player.addEmpathy(constants::EMPATHY_REWARD_NEUTRAL);
                 m_playerTurn = false;
                 m_currentMenu = CombatMenu::Main;
             } else {
                 logMessage("Ваши слова ввергают врага в ярость!");
                 m_enemy->setDamageModifier(m_enemy->getDamageModifier() + 0.3f);
-                m_player.addEmpathy(2);
+                m_player.addEmpathy(constants::EMPATHY_REWARD_WRONG);
                 m_playerTurn = false;
                 m_currentMenu = CombatMenu::Main;
             }
@@ -190,8 +192,8 @@ void CombatState::handleInput() {
         if (num == 0) m_currentMenu = CombatMenu::Main;
         else if (num == 1) { // Take
             if (m_enemy->isDrainable()) {
-                m_player.addHeat(15.0f);
-                m_enemy->setDefenseModifier(m_enemy->getDefenseModifier() - 0.2f);
+                m_player.addHeat(constants::MANIP_TAKE_HEAT_GAIN);
+                m_enemy->setDefenseModifier(m_enemy->getDefenseModifier() + constants::MANIP_TAKE_DEF_DEBUFF);
                 m_enemy->setDrainable(false);
                 logMessage("Вы поглощаете энергию!");
                 m_playerTurn = false;
@@ -201,10 +203,10 @@ void CombatState::handleInput() {
             }
         } else if (num == 2) { // Give
             if (m_player.getHeat() > 0) {
-                float heatGiven = m_player.getHeat() * 0.2f;
-                m_player.reduceHeat(heatGiven);
-                m_player.heal((int)(heatGiven * 0.5f));
-                m_enemy->setDamageModifier(m_enemy->getDamageModifier() + 0.2f);
+                float heatToVent = m_player.getHeat() * constants::MANIP_GIVE_HEAT_VENT_PERCENT;
+                m_player.reduceHeat(heatToVent);
+                m_player.heal((int)(heatToVent * constants::MANIP_GIVE_HEAL_MULT));
+                m_enemy->setDamageModifier(m_enemy->getDamageModifier() + constants::MANIP_GIVE_DMG_BUFF);
                 m_enemy->setDrainable(true);
                 logMessage("Вы отдаете жар! Враг заряжен.");
                 m_playerTurn = false;
@@ -228,8 +230,8 @@ void CombatState::enemyTurn() {
     m_player.takeDamage(dmg);
     logMessage(m_enemy->getName() + " атакует! Урон: " + std::to_string(dmg));
 
-    if (m_player.getHeat() > 85.0f) {
-        int overloadDmg = (int)((m_player.getHeat() - 85.0f) * 0.5f);
+    if (m_player.getHeat() > constants::HEAT_OVERLOAD_THRESHOLD) {
+        int overloadDmg = (int)((m_player.getHeat() - constants::HEAT_OVERLOAD_THRESHOLD) * constants::HEAT_DAMAGE_MULT);
         m_player.takeDamage(overloadDmg);
         logMessage("ПЕРЕГРУЗКА! Системы горят. Урон: " + std::to_string(overloadDmg));
     }

@@ -66,14 +66,14 @@ void UIBox::setProgressBar(float percentage, sf::Color color) {
     m_barPercentage = std::max(0.0f, std::min(1.0f, percentage));
     
     float barMaxWidth = m_shape.getSize().x - (m_padding.x * 2.f);
-    m_bar.setSize({barMaxWidth * m_barPercentage, 15.f});
+    m_bar.setSize({barMaxWidth * m_barPercentage, constants::UI_BAR_HEIGHT});
     m_bar.setFillColor(color);
 }
 
 void UIBox::render(sf::RenderWindow& window) {
     window.draw(m_shape);
     if (m_hasBar) {
-        m_bar.setPosition(m_shape.getPosition() + sf::Vector2f(m_padding.x, m_shape.getSize().y - 25.f));
+        m_bar.setPosition(m_shape.getPosition() + sf::Vector2f(m_padding.x, m_shape.getSize().y - (constants::UI_BAR_HEIGHT + 10.f)));
         window.draw(m_bar);
     }
     if (m_text) {

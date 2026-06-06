@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "Mechanics/StatusEffect.h"
+#include "Utils/GameConstans.h"
 
 namespace solis {
 
@@ -77,7 +78,7 @@ private:
     float m_damageModifier = 1.0f;
     float m_defenseModifier = 1.0f;
 
-    int m_empathyRevealThreshold = 20; 
+    int m_empathyRevealThreshold = constants::EMPATHY_DEFAULT_REVEAL_THRESHOLD; 
     bool m_isDrainable = true; 
 
     std::vector<StatusEffect> m_activeEffects;

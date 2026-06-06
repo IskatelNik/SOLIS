@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include "Utils/GameConstans.h"
 
 namespace solis {
 
@@ -24,7 +25,7 @@ private:
     sf::RectangleShape m_bar;
     std::unique_ptr<sf::Text> m_text;
     
-    sf::Vector2f m_padding = {10.f, 10.f};
+    sf::Vector2f m_padding = {constants::UI_PADDING, constants::UI_PADDING};
     float m_barPercentage = 0.0f;
     bool m_hasBar = false;
 };
