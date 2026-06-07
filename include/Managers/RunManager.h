@@ -1,5 +1,9 @@
+#ifndef RUN_MANAGER_H
+#define RUN_MANAGER_H
+
 #include "Managers/DataManager.h"
 #include "Entities/Player.h"
+#include "Managers/SaveManager.h"
 #include <vector>
 #include <memory>
 
@@ -21,14 +25,14 @@ public:
 
     Player& getPlayer() { return m_player; }
     
-    // MVP 3: Lore & Empathy
+    // MVP 3 & 4: Lore, Empathy, Sparks
     void unlockLore(const std::string& id);
     bool isLoreUnlocked(const std::string& id) const;
     const std::vector<std::string>& getUnlockedLore() const { return m_unlockedLore; }
 
-    int getEmpathyForTrait(Trait t) const;
     void addEmpathy(int amount);
-    int getTotalEmpathy() const { return m_totalEmpathy; }
+    void addSparks(int amount);
+    int getTotalSparks() const;
 
 private:
     RunManager();
@@ -41,7 +45,8 @@ private:
     Player m_player;
 
     std::vector<std::string> m_unlockedLore;
-    int m_totalEmpathy = 0;
 };
 
 } // namespace solis
+
+#endif // RUN_MANAGER_H

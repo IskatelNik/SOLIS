@@ -35,6 +35,19 @@ void StateMachine::processStateChanges() {
     }
 }
 
+void StateMachine::clearAndSetState(std::unique_ptr<State> newState) {
+    while (!m_states.empty()) {
+        m_states.pop();
+    }
+    m_states.push(std::move(newState));
+    m_states.top()->init();
+    
+    // Сбрасываем флаги изменений, так как мы уже всё применили принудительно
+    m_isAdding = false;
+    m_isRemoving = false;
+    m_isReplacing = false;
+}
+
 State& StateMachine::getActiveState() const {
     return *m_states.top();
 }

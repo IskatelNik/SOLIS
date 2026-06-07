@@ -33,6 +33,13 @@ namespace constants {
     constexpr float TERMINAL_HEAT_VENT_PERCENT = 0.90f;
     constexpr float TERMINAL_HEAL_PERCENT = 0.15f;
 
+    // --- META-PROGRESSION & SHOP ---
+    constexpr int UPGRADE_HP_COST = 50;
+    constexpr int UPGRADE_HP_BONUS = 20;
+    constexpr int UPGRADE_HEAT_CAP_COST = 75;
+    constexpr float UPGRADE_HEAT_CAP_BONUS = 20.0f;
+    constexpr const char* SAVE_FILE_PATH = "save.json";
+
     // --- COMBAT MANIPULATION ---
     constexpr float MANIP_TAKE_HEAT_GAIN = 15.0f;
     constexpr float MANIP_TAKE_DEF_DEBUFF = -0.2f;

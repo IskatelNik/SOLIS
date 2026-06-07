@@ -1,8 +1,10 @@
 #include "Core/Game.h"
-#include "States/ExplorationState.h"
+#include "States/HubState.h"
 #include "Core/ResourceManager.h"
 #include "Managers/DataManager.h"
 #include "Managers/RunManager.h"
+#include "Managers/SaveManager.h"
+#include "Utils/GameConstans.h"
 #include <iostream>
 
 namespace solis {
@@ -15,16 +17,20 @@ Game::Game(const std::string& title, unsigned int width, unsigned int height)
         std::cerr << "[Game] Warning: Default font not found at assets/fonts/font_main.ttf" << std::endl;
     }
 
-    // Загружаем базы данных (MVP 1 & 2 & 3)
+    // Загружаем базы данных
     DataManager::getInstance().loadRooms("data/rooms.json");
     DataManager::getInstance().loadEnemies("data/enemies.json");
     DataManager::getInstance().loadSkills("data/skills.json");
     DataManager::getInstance().loadLore("data/lore.json");
+    DataManager::getInstance().loadUpgrades("data/upgrades.json");
 
-    RunManager::getInstance().startNewRun();
+    // Загружаем сохранение (MVP 4)
+    if (!SaveManager::getInstance().load()) {
+        std::cerr << "[Game] Warning: Could not load or create save file." << std::endl;
+    }
 
-    // Устанавливаем начальное состояние
-    m_stateMachine.pushState(std::make_unique<ExplorationState>(m_window, m_stateMachine));
+    // Устанавливаем начальное состояние - Хаб
+    m_stateMachine.pushState(std::make_unique<HubState>(m_window, m_stateMachine));
 }
 
 void Game::run() {

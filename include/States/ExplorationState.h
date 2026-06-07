@@ -32,6 +32,7 @@ private:
     std::vector<Room> m_currentOptions;
     bool m_awaitingChoice = true;
     bool m_isShowingDescription = false;
+    bool m_keyHeld = false; // New flag
     std::string m_pendingEnemyId;
     std::string m_discoveredLoreId;
     const Room* m_pendingTerminalRoom = nullptr;

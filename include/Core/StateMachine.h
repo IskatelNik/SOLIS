@@ -18,6 +18,8 @@ public:
 
     void processStateChanges();
 
+    void clearAndSetState(std::unique_ptr<State> newState); // MVP 4 Fix: For Game Over
+
     State& getActiveState() const;
     bool isEmpty() const;
 

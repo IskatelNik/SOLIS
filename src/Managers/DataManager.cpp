@@ -108,6 +108,28 @@ bool DataManager::loadLore(const std::string& filepath) {
     } catch (...) { return false; }
 }
 
+bool DataManager::loadUpgrades(const std::string& filepath) {
+    std::ifstream file(filepath);
+    if (!file.is_open()) return false;
+
+    try {
+        nlohmann::json j;
+        file >> j;
+        for (const auto& item : j["upgrades"]) {
+            Upgrade upg;
+            upg.id = item["id"];
+            upg.name = item["name"];
+            upg.description = item["description"];
+            upg.cost = item.value("cost", 50);
+            upg.type = item.value("type", "passive_stat");
+            upg.stat_type = item.value("stat_type", "");
+            upg.value = item.value("value", 0.0f);
+            m_upgrades[upg.id] = upg;
+        }
+        return true;
+    } catch (...) { return false; }
+}
+
 std::unique_ptr<Enemy> DataManager::spawnEnemy(const std::string& id) {
     if (m_enemyTemplates.find(id) == m_enemyTemplates.end()) return nullptr;
 

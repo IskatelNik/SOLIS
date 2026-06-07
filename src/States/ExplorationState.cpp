@@ -45,6 +45,7 @@ void ExplorationState::init() {
     );
 
     generateNextStep();
+    m_keyHeld = true; // MVP 4 Fix: Prevent input bleed from HubState
 }
 
 void ExplorationState::generateNextStep() {
@@ -73,18 +74,20 @@ void ExplorationState::handleInput() {
         m_window.close();
     }
 
-    static bool keyHeld = false;
     bool anyNumPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num1) || 
                          sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num2) || 
                          sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num3);
     bool spacePressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space);
+    bool enterPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Enter);
 
-    if (!anyNumPressed && !spacePressed) {
-        keyHeld = false;
+    // Ждем, пока все управляющие клавиши будут отпущены
+    if (!anyNumPressed && !spacePressed && !enterPressed) {
+        m_keyHeld = false;
         return;
     }
 
-    if (keyHeld) return;
+    // Если любая из клавиш всё еще зажата с прошлого состояния - игнорируем
+    if (m_keyHeld) return;
 
     if (m_awaitingChoice && !m_isShowingDescription) {
         int choice = -1;
@@ -93,7 +96,7 @@ void ExplorationState::handleInput() {
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num3)) choice = 2;
 
         if (choice >= 0 && static_cast<size_t>(choice) < m_currentOptions.size()) {
-            keyHeld = true;
+            m_keyHeld = true; // Используем переменную класса
             const Room& selectedRoom = m_currentOptions[choice];
             const sf::Font& font = ResourceManager::getInstance().getFont("main");
             
@@ -154,7 +157,7 @@ void ExplorationState::handleInput() {
             else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num2)) termChoice = 2;
 
             if (termChoice == 1) {
-                keyHeld = true;
+                m_keyHeld = true; // Используем переменную класса
                 Player& player = RunManager::getInstance().getPlayer();
                 float heatVented = player.getHeat() * constants::TERMINAL_HEAT_VENT_PERCENT;
                 int healAmount = (int)(player.getMaxHp() * constants::TERMINAL_HEAL_PERCENT);
@@ -170,14 +173,14 @@ void ExplorationState::handleInput() {
                 m_actionMenu->setText(sf::String::fromUtf8(prompt.begin(), prompt.end()), font, 24, sf::Color::Yellow);
                 m_pendingTerminalRoom = nullptr;
             } else if (termChoice == 2) {
-                keyHeld = true;
+                m_keyHeld = true;
                 m_pendingTerminalRoom = nullptr;
                 m_isShowingDescription = false;
                 generateNextStep();
             }
         } 
         else if (spacePressed) {
-            keyHeld = true;
+            m_keyHeld = true;
             m_isShowingDescription = false;
             m_discoveredLoreId = "";
             if (!m_pendingEnemyId.empty()) {

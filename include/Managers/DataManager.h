@@ -28,6 +28,16 @@ struct LoreItem {
     std::string dialogue_option_text;
 };
 
+struct Upgrade {
+    std::string id;
+    std::string name;
+    std::string description;
+    int cost;
+    std::string type;      // "passive_stat" or "active_skill"
+    std::string stat_type; // e.g., "hp_boost"
+    float value;
+};
+
 class DataManager {
 public:
     static DataManager& getInstance();
@@ -36,13 +46,15 @@ public:
     bool loadEnemies(const std::string& filepath);
     bool loadSkills(const std::string& filepath);
     bool loadLore(const std::string& filepath);
+    bool loadUpgrades(const std::string& filepath);
 
     const std::vector<Room>& getRooms() const { return m_rooms; }
     
-    // MVP 2 & 3
+    // MVP 2, 3, 4
     std::unique_ptr<Enemy> spawnEnemy(const std::string& id);
     const std::map<std::string, Skill>& getSkills() const { return m_skills; }
     const std::map<std::string, LoreItem>& getLore() const { return m_lore; }
+    const std::map<std::string, Upgrade>& getUpgrades() const { return m_upgrades; }
 
 private:
     DataManager() = default;
@@ -54,6 +66,7 @@ private:
     std::map<std::string, nlohmann::json> m_enemyTemplates;
     std::map<std::string, Skill> m_skills;
     std::map<std::string, LoreItem> m_lore;
+    std::map<std::string, Upgrade> m_upgrades;
 };
 
 } // namespace solis

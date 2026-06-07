@@ -1,4 +1,5 @@
 #include "States/CombatState.h"
+#include "States/HubState.h"
 #include "Core/ResourceManager.h"
 #include "Managers/RunManager.h"
 #include "Utils/GameConstans.h"
@@ -28,10 +29,14 @@ void CombatState::init() {
 
     logMessage(m_enemy->getIntroText());
     
+    // MVP 4 Fix: Защита от "прокликивания" при входе. 
+    // Если игрок зашел в бой нажатием Space, мы заставляем его отпустить кнопку.
+    m_keyHeld = true; 
+
     if (m_player.getHeat() >= constants::HEAT_MAX) {
         logMessage("КРИТИЧЕСКИЙ ПЕРЕГРЕВ! Вы сгораете заживо...");
         m_player.takeDamage(999);
-        checkEndCombat();
+        m_isCombatOver = true;
     }
 
     updateUI();
@@ -172,18 +177,18 @@ void CombatState::handleInput() {
             const auto& opt = m_dialogueOptions[num - 1];
             if (opt.isCorrect) {
                 logMessage("Вы подобрали верные слова! Враг опускает оружие.");
-                m_player.addEmpathy(constants::EMPATHY_REWARD_CORRECT);
+                RunManager::getInstance().addEmpathy(constants::EMPATHY_REWARD_CORRECT);
                 m_isSocialVictory = true;
                 m_isCombatOver = true;
             } else if (opt.isNeutral) {
                 logMessage("Ваши слова не трогают врага. Он игнорирует вас.");
-                m_player.addEmpathy(constants::EMPATHY_REWARD_NEUTRAL);
+                RunManager::getInstance().addEmpathy(constants::EMPATHY_REWARD_NEUTRAL);
                 m_playerTurn = false;
                 m_currentMenu = CombatMenu::Main;
             } else {
                 logMessage("Ваши слова ввергают врага в ярость!");
                 m_enemy->setDamageModifier(m_enemy->getDamageModifier() + 0.3f);
-                m_player.addEmpathy(constants::EMPATHY_REWARD_WRONG);
+                RunManager::getInstance().addEmpathy(constants::EMPATHY_REWARD_WRONG);
                 m_playerTurn = false;
                 m_currentMenu = CombatMenu::Main;
             }
@@ -241,7 +246,8 @@ void CombatState::enemyTurn() {
 
 void CombatState::checkEndCombat() {
     if (m_enemy->getCurrentHp() <= 0) {
-        logMessage("ПОБЕДА! Враг повержен.");
+        logMessage("ПОБЕДА! Враг повержен. +10 Искр.");
+        RunManager::getInstance().addSparks(10);
         m_isCombatOver = true;
     } else if (m_player.getCurrentHp() <= 0) {
         logMessage("ПОРАЖЕНИЕ... Ваша искра угасла.");
@@ -251,10 +257,13 @@ void CombatState::checkEndCombat() {
 
 void CombatState::endCombat(bool victory) {
     if (victory) {
+        if (m_isSocialVictory) {
+            RunManager::getInstance().addSparks(5);
+        }
         m_stateMachine.popState();
     } else {
-        RunManager::getInstance().startNewRun();
-        m_stateMachine.popState();
+        // Game Over: Полный сброс стека и возврат в Хаб
+        m_stateMachine.clearAndSetState(std::make_unique<HubState>(m_window, m_stateMachine));
     }
 }
 
