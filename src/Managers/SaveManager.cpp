@@ -29,6 +29,13 @@ bool SaveManager::load() {
         m_data.equipped_skills = j.value("equipped_skills", std::vector<std::string>{});
         m_data.blood_counter = j.value("blood_counter", 0);
         m_data.mercy_counter = j.value("mercy_counter", 0);
+        m_data.ideology_score = j.value("ideology_score", 0);
+        
+        if (j.contains("event_progress")) {
+            for (auto& el : j["event_progress"].items()) {
+                m_data.event_progress[std::stoi(el.key())] = el.value();
+            }
+        }
 
         return true;
     } catch (const std::exception& e) {
@@ -46,6 +53,13 @@ bool SaveManager::save() {
     j["equipped_skills"] = m_data.equipped_skills;
     j["blood_counter"] = m_data.blood_counter;
     j["mercy_counter"] = m_data.mercy_counter;
+    j["ideology_score"] = m_data.ideology_score;
+    
+    nlohmann::json ep;
+    for (const auto& [lvl, prog] : m_data.event_progress) {
+        ep[std::to_string(lvl)] = prog;
+    }
+    j["event_progress"] = ep;
 
     std::ofstream file(constants::SAVE_FILE_PATH);
     if (!file.is_open()) {

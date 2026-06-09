@@ -4,6 +4,7 @@
 #include <vector>
 #include "Mechanics/Skill.h"
 #include "Mechanics/StatusEffect.h"
+#include "Mechanics/Artifact.h"
 #include "Utils/GameConstans.h"
 
 namespace solis {
@@ -16,6 +17,12 @@ public:
     void heal(int amount);
     void addHeat(float amount);
     void reduceHeat(float amount);
+
+    // MVP 5: Modifiers
+    float calculateHeatGain(float baseAmount) const;
+    void addArtifact(const Artifact& artifact) { m_artifacts.push_back(artifact); }
+    void addStatusEffect(const StatusEffect& effect) { m_activeEffects.push_back(effect); }
+    void processTurnEffects();
 
     // Эмпатия (MVP 3 Update)
     int getEmpathy() const { return m_empathyLevel; }
@@ -39,6 +46,8 @@ private:
     int m_empathyLevel = 0;
 
     std::vector<Skill> m_activeSkills;
+    std::vector<Artifact> m_artifacts;
+    std::vector<StatusEffect> m_activeEffects;
 };
 
 } // namespace solis

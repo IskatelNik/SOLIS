@@ -57,6 +57,20 @@ bool DataManager::loadEnemies(const std::string& filepath) {
     } catch (...) { return false; }
 }
 
+bool DataManager::loadBosses(const std::string& filepath) {
+    std::ifstream file(filepath);
+    if (!file.is_open()) return false;
+
+    try {
+        nlohmann::json j;
+        file >> j;
+        for (const auto& item : j["bosses"]) {
+            m_bossTemplates[item["id"]] = item;
+        }
+        return true;
+    } catch (...) { return false; }
+}
+
 bool DataManager::loadSkills(const std::string& filepath) {
     std::ifstream file(filepath);
     if (!file.is_open()) return false;
@@ -130,6 +144,57 @@ bool DataManager::loadUpgrades(const std::string& filepath) {
     } catch (...) { return false; }
 }
 
+bool DataManager::loadArtifacts(const std::string& filepath) {
+    std::ifstream file(filepath);
+    if (!file.is_open()) return false;
+
+    try {
+        nlohmann::json j;
+        file >> j;
+        for (const auto& item : j["artifacts"]) {
+            Artifact art;
+            art.id = item["id"];
+            art.name = item["name"];
+            art.description = item["description"];
+            art.modifier_type = item["modifier_type"];
+            art.value = item["value"];
+            m_artifacts[art.id] = art;
+        }
+        return true;
+    } catch (...) { return false; }
+}
+
+bool DataManager::loadEvents(const std::string& filepath) {
+    std::ifstream file(filepath);
+    if (!file.is_open()) return false;
+
+    try {
+        nlohmann::json j;
+        file >> j;
+        for (const auto& item : j["events"]) {
+            Event ev;
+            ev.id = item["id"];
+            ev.level = item.value("level", 1);
+            ev.order_index = item.value("order_index", 0);
+            ev.title = item["title"];
+            ev.description = item["description"];
+            
+            ev.choice_ficio.text = item["choice_ficio"]["text"];
+            ev.choice_ficio.heat_change = item["choice_ficio"]["heat_change"];
+            ev.choice_ficio.ideology_change = item["choice_ficio"]["ideology_change"];
+            ev.choice_ficio.result_text = item["choice_ficio"]["result_text"];
+            
+            ev.choice_finesa.text = item["choice_finesa"]["text"];
+            ev.choice_finesa.heat_change = item["choice_finesa"]["heat_change"];
+            ev.choice_finesa.ideology_change = item["choice_finesa"]["ideology_change"];
+            ev.choice_finesa.result_text = item["choice_finesa"]["result_text"];
+
+            m_events[ev.id] = ev;
+        }
+        return true;
+    } catch (...) { return false; }
+}
+
 std::unique_ptr<Enemy> DataManager::spawnEnemy(const std::string& id) {
     if (m_enemyTemplates.find(id) == m_enemyTemplates.end()) return nullptr;
 
@@ -159,6 +224,37 @@ std::unique_ptr<Enemy> DataManager::spawnEnemy(const std::string& id) {
     }
 
     return enemy;
+}
+
+std::unique_ptr<BossEnemy> DataManager::spawnBoss(const std::string& id) {
+    if (m_bossTemplates.find(id) == m_bossTemplates.end()) return nullptr;
+
+    const auto& j = m_bossTemplates[id];
+    auto boss = std::make_unique<BossEnemy>();
+    boss->setId(id);
+    boss->setName(j.value("name", "Unknown Boss"));
+    boss->setMaxHp(j.value("max_hp", 200));
+    boss->setBaseDamage(j.value("base_damage", 15)); // Base damage moved to root
+    boss->setMaxWillpower(j.value("max_willpower", 3));
+    boss->setSparksReward(j.value("sparks_reward", 50));
+
+    if (j.contains("phases")) {
+        for (const auto& pJ : j["phases"]) {
+            BossPhase p;
+            p.willpower_left = pJ.value("willpower_left", 0);
+            p.target_trait = static_cast<Trait>(pJ.value("target_trait", 0));
+            p.target_trait_name = pJ.value("target_trait_name", "???");
+            p.boss_replica = pJ.value("boss_replica", "...");
+            p.success_reply = pJ.value("success_reply", "Успех!");
+            p.fail_reply = pJ.value("fail_reply", "Провал!");
+            p.aggression_turns = pJ.value("aggression_turns", 0);
+            boss->addPhase(p);
+        }
+    }
+    
+    boss->updatePhase();
+
+    return boss;
 }
 
 } // namespace solis

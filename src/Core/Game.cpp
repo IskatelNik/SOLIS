@@ -20,9 +20,12 @@ Game::Game(const std::string& title, unsigned int width, unsigned int height)
     // Загружаем базы данных
     DataManager::getInstance().loadRooms("data/rooms.json");
     DataManager::getInstance().loadEnemies("data/enemies.json");
+    DataManager::getInstance().loadBosses("data/bosses.json");
     DataManager::getInstance().loadSkills("data/skills.json");
     DataManager::getInstance().loadLore("data/lore.json");
     DataManager::getInstance().loadUpgrades("data/upgrades.json");
+    DataManager::getInstance().loadArtifacts("data/artifacts.json");
+    DataManager::getInstance().loadEvents("data/events.json");
 
     // Загружаем сохранение (MVP 4)
     if (!SaveManager::getInstance().load()) {

@@ -1,0 +1,18 @@
+{
+  "artifacts": [
+    {
+      "id": "artifact_cooler",
+      "name": "Древний Охладитель",
+      "description": "Снижает получаемый Жар на 20%",
+      "modifier_type": "heat_gain_mult",
+      "value": 0.8
+    },
+    {
+      "id": "artifact_lens",
+      "name": "Фокусирующая линза",
+      "description": "Увеличивает получаемый Жар на 50% (для рискованных билдов)",
+      "modifier_type": "heat_gain_mult",
+      "value": 1.5
+    }
+  ]
+}

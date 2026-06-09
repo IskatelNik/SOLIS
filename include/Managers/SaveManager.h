@@ -15,6 +15,8 @@ struct SaveData {
     std::vector<std::string> equipped_skills;
     int blood_counter = 0;
     int mercy_counter = 0;
+    int ideology_score = 0;
+    std::map<int, int> event_progress; // Level -> number of events completed
 };
 
 class SaveManager {

@@ -21,11 +21,14 @@ std::vector<DialogueGenerator::DialogueOption> DialogueGenerator::generateOption
     int n1 = (target - 1 + 8) % 8;
     int n2 = (target + 1) % 8;
     
+    // MVP 5: Biome Modifiers (Level 2 disables neutral answers)
+    bool isNeutralValid = (currentLevel != 2);
+
     LoreItem neutral1 = getBestLoreForTrait(n1, currentLevel, unlocked);
-    options.push_back({neutral1.dialogue_option_text, n1, false, true});
+    options.push_back({neutral1.dialogue_option_text, n1, false, isNeutralValid});
     
     LoreItem neutral2 = getBestLoreForTrait(n2, currentLevel, unlocked);
-    options.push_back({neutral2.dialogue_option_text, n2, false, true});
+    options.push_back({neutral2.dialogue_option_text, n2, false, isNeutralValid});
 
     // 3. Неверный ответ (случайный из оставшихся)
     std::vector<int> others;

@@ -19,13 +19,15 @@ public:
     std::vector<Room> getNextRoomOptions();
     
     void moveToRoom(const Room& room);
+    void advanceLevel();
 
     int getCurrentLevel() const { return m_currentLevel; }
+    void setCurrentLevel(int level) { m_currentLevel = level; }
     int getCurrentRoomIndex() const { return m_currentRoomIndex; }
 
     Player& getPlayer() { return m_player; }
     
-    // MVP 3 & 4: Lore, Empathy, Sparks
+    // MVP 3 & 4 & 5: Lore, Empathy, Sparks, Ideology, Events
     void unlockLore(const std::string& id);
     bool isLoreUnlocked(const std::string& id) const;
     const std::vector<std::string>& getUnlockedLore() const { return m_unlockedLore; }
@@ -33,6 +35,15 @@ public:
     void addEmpathy(int amount);
     void addSparks(int amount);
     int getTotalSparks() const;
+
+    int getIdeologyScore() const;
+    void modifyIdeologyScore(int amount);
+
+    int getEventProgress(int level) const;
+    void incrementEventProgress(int level);
+
+    void incrementBloodCounter();
+    void incrementMercyCounter();
 
 private:
     RunManager();

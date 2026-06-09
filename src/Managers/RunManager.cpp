@@ -87,12 +87,63 @@ void RunManager::addEmpathy(int amount) {
     SaveManager::getInstance().save();
 }
 
+int RunManager::getIdeologyScore() const {
+    return SaveManager::getInstance().getData().ideology_score;
+}
+
+void RunManager::modifyIdeologyScore(int amount) {
+    SaveManager::getInstance().getData().ideology_score += amount;
+    SaveManager::getInstance().save();
+}
+
+int RunManager::getEventProgress(int level) const {
+    auto& ep = SaveManager::getInstance().getData().event_progress;
+    if (ep.find(level) != ep.end()) {
+        return ep[level];
+    }
+    return 0;
+}
+
+void RunManager::incrementEventProgress(int level) {
+    SaveManager::getInstance().getData().event_progress[level]++;
+    SaveManager::getInstance().save();
+}
+
+void RunManager::incrementBloodCounter() {
+    SaveManager::getInstance().getData().blood_counter++;
+    SaveManager::getInstance().save();
+}
+
+void RunManager::incrementMercyCounter() {
+    SaveManager::getInstance().getData().mercy_counter++;
+    SaveManager::getInstance().save();
+}
+
+void RunManager::advanceLevel() {
+    m_currentLevel++;
+    m_currentRoomIndex = 0;
+}
+
 std::vector<Room> RunManager::getNextRoomOptions() {
+    // Если игрок прошел достаточно комнат (например, 5 для MVP 5), генерируем босса
+    if (m_currentRoomIndex >= 5) {
+        Room bossRoom;
+        bossRoom.id = "room_boss_" + std::to_string(m_currentLevel);
+        bossRoom.level = m_currentLevel;
+        bossRoom.type = "boss";
+        bossRoom.preview_text = "Огромные Врата (БОСС)";
+        bossRoom.description = "За этими вратами скрывается страж этого сектора. Пути назад нет.";
+        // В зависимости от уровня ставим нужного босса. Для MVP 5 пока Виндикт на всех уровнях или только на 4.
+        // Пока хардкодим Виндикта для тестирования
+        bossRoom.possible_enemies = {"boss_vindict"}; 
+        return { bossRoom };
+    }
+
     const auto& allRooms = DataManager::getInstance().getRooms();
     std::vector<Room> availableRooms;
 
     for (const auto& room : allRooms) {
-        if (room.level == m_currentLevel) {
+        if (room.level == m_currentLevel && room.type != "boss") {
             availableRooms.push_back(room);
         }
     }

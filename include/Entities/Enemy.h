@@ -28,6 +28,9 @@ struct EnemyTraitInfo {
 class Enemy {
 public:
     Enemy();
+    virtual ~Enemy() = default;
+
+    virtual bool isBoss() const { return false; }
 
     void takeDamage(int damage);
     
@@ -62,6 +65,9 @@ public:
 
     bool isDrainable() const { return m_isDrainable; }
     void setDrainable(bool drainable) { m_isDrainable = drainable; }
+
+    void addStatusEffect(const StatusEffect& effect) { m_activeEffects.push_back(effect); }
+    void processTurnEffects();
 
 private:
     std::string m_id;

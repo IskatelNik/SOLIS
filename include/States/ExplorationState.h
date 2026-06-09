@@ -5,6 +5,7 @@
 #include "Core/StateMachine.h"
 #include "UI/UIBox.h"
 #include "Managers/DataManager.h"
+#include "Mechanics/Event.h"
 #include <memory>
 #include <vector>
 
@@ -36,6 +37,7 @@ private:
     std::string m_pendingEnemyId;
     std::string m_discoveredLoreId;
     const Room* m_pendingTerminalRoom = nullptr;
+    const Event* m_pendingEvent = nullptr;
 };
 
 } // namespace solis

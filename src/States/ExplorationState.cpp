@@ -112,6 +112,12 @@ void ExplorationState::handleInput() {
                     std::string prompt = "[Space] ВСТУПИТЬ В БОЙ";
                     m_actionMenu->setText(sf::String::fromUtf8(prompt.begin(), prompt.end()), font, 24, sf::Color::Red);
                 }
+            } else if (selectedRoom.type == "boss") {
+                if (!selectedRoom.possible_enemies.empty()) {
+                    m_pendingEnemyId = selectedRoom.possible_enemies[0]; // Первого босса из списка
+                    std::string prompt = "[Space] БРОСИТЬ ВЫЗОВ БОССУ";
+                    m_actionMenu->setText(sf::String::fromUtf8(prompt.begin(), prompt.end()), font, 24, sf::Color::Red);
+                }
             } else if (selectedRoom.type == "lore_room") {
                 m_pendingEnemyId = "";
                 const auto& allLore = DataManager::getInstance().getLore();
@@ -137,11 +143,44 @@ void ExplorationState::handleInput() {
                 m_actionMenu->setText(sf::String::fromUtf8(prompt.begin(), prompt.end()), font, 24, sf::Color::Yellow);
             } else if (selectedRoom.type == "heat_sink") {
                 m_pendingEnemyId = "";
+                m_pendingEvent = nullptr;
                 m_pendingTerminalRoom = &selectedRoom;
                 std::string menuChoices = "[1] Использовать терминал\n[2] Пройти мимо";
                 m_actionMenu->setText(sf::String::fromUtf8(menuChoices.begin(), menuChoices.end()), font, 24, sf::Color::Green);
+            } else if (selectedRoom.type == "quest") {
+                m_pendingEnemyId = "";
+                m_pendingTerminalRoom = nullptr;
+                m_discoveredLoreId = "";
+
+                int currentLevel = RunManager::getInstance().getCurrentLevel();
+                int progress = RunManager::getInstance().getEventProgress(currentLevel);
+                
+                const auto& allEvents = DataManager::getInstance().getEvents();
+                const Event* currentEvent = nullptr;
+                for (const auto& [id, ev] : allEvents) {
+                    if (ev.level == currentLevel && ev.order_index == progress) {
+                        currentEvent = &ev;
+                        break;
+                    }
+                }
+                
+                if (currentEvent) {
+                    m_pendingEvent = currentEvent;
+                    std::string text = currentEvent->title + "\n\n" + currentEvent->description;
+                    m_mainDisplay->setText(sf::String::fromUtf8(text.begin(), text.end()), font, 22, sf::Color::White);
+                    
+                    std::string menuChoices = "[1] " + currentEvent->choice_ficio.text + "\n[2] " + currentEvent->choice_finesa.text;
+                    m_actionMenu->setText(sf::String::fromUtf8(menuChoices.begin(), menuChoices.end()), font, 24, sf::Color::Green);
+                } else {
+                    std::string msg = "ПУСТОТА\n\nЗдесь больше нет событий.";
+                    m_mainDisplay->setText(sf::String::fromUtf8(msg.begin(), msg.end()), font, 22, sf::Color::White);
+                    std::string prompt = "[Space] Продолжить...";
+                    m_actionMenu->setText(sf::String::fromUtf8(prompt.begin(), prompt.end()), font, 24, sf::Color::Yellow);
+                }
             } else {
                 m_pendingEnemyId = "";
+                m_pendingEvent = nullptr;
+                m_pendingTerminalRoom = nullptr;
                 std::string prompt = "[Space] Продолжить...";
                 m_actionMenu->setText(sf::String::fromUtf8(prompt.begin(), prompt.end()), font, 24, sf::Color::Yellow);
             }
@@ -178,13 +217,43 @@ void ExplorationState::handleInput() {
                 m_isShowingDescription = false;
                 generateNextStep();
             }
-        } 
+        } else if (m_pendingEvent) {
+            int evChoice = -1;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num1)) evChoice = 1;
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num2)) evChoice = 2;
+
+            if (evChoice == 1 || evChoice == 2) {
+                m_keyHeld = true;
+                const EventChoice& choice = (evChoice == 1) ? m_pendingEvent->choice_ficio : m_pendingEvent->choice_finesa;
+                
+                Player& player = RunManager::getInstance().getPlayer();
+                if (choice.heat_change > 0) player.addHeat(choice.heat_change);
+                else player.reduceHeat(-choice.heat_change);
+                
+                RunManager::getInstance().modifyIdeologyScore(choice.ideology_change);
+                RunManager::getInstance().incrementEventProgress(m_pendingEvent->level);
+                
+                const sf::Font& font = ResourceManager::getInstance().getFont("main");
+                m_mainDisplay->setText(sf::String::fromUtf8(choice.result_text.begin(), choice.result_text.end()), font, 22, constants::COLOR_LORE_DISCOVERY);
+                std::string prompt = "[Space] Продолжить...";
+                m_actionMenu->setText(sf::String::fromUtf8(prompt.begin(), prompt.end()), font, 24, sf::Color::Yellow);
+                m_pendingEvent = nullptr;
+            }
+        }
         else if (spacePressed) {
             m_keyHeld = true;
             m_isShowingDescription = false;
             m_discoveredLoreId = "";
             if (!m_pendingEnemyId.empty()) {
-                auto enemy = DataManager::getInstance().spawnEnemy(m_pendingEnemyId);
+                std::unique_ptr<Enemy> enemy;
+                
+                // Проверяем, босс ли это (костыль, но для MVP работает)
+                if (m_pendingEnemyId.find("boss") != std::string::npos) {
+                    enemy = DataManager::getInstance().spawnBoss(m_pendingEnemyId);
+                } else {
+                    enemy = DataManager::getInstance().spawnEnemy(m_pendingEnemyId);
+                }
+
                 m_pendingEnemyId = "";
                 if (enemy) {
                     m_stateMachine.pushState(std::make_unique<CombatState>(m_window, m_stateMachine, std::move(enemy)));

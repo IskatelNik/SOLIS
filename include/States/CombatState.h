@@ -35,6 +35,7 @@ private:
     void updateUI();
     void logMessage(const std::string& msg);
     void enemyTurn();
+    void processTurnEnd();
     void checkEndCombat();
     void endCombat(bool victory);
 
@@ -57,6 +58,7 @@ private:
     bool m_isCombatOver = false;
     bool m_isSocialVictory = false; // MVP 3 Fix
     bool m_keyHeld = false;
+    bool m_justNegotiated = false; // MVP 5: Fix aggression turns counting
 };
 
 } // namespace solis
