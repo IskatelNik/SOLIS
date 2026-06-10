@@ -11,3 +11,6 @@ cmake-build-*/
 *.exe
 *.dll
 *.log
+
+# documents/
+.gemini/
