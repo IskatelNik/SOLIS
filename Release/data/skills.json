@@ -1,0 +1,27 @@
+{
+  "skills": [
+    {
+      "id": "skill_solar_flare",
+      "name": "Солнечная Вспышка",
+      "heat_cost_added": 25.0,
+      "base_damage": 15,
+      "description": "Наносит 15 урона, увеличивает Жар на 25%.",
+      "effects": []
+    },
+    {
+      "id": "skill_blinding_light",
+      "name": "Ослепляющий Свет",
+      "heat_cost_added": 30.0,
+      "base_damage": 5,
+      "description": "Наносит мало урона (5), но Ослепляет врага (Заглушка).",
+      "effects": [
+        {
+          "target": "enemy",
+          "type": "debuff_damage_multiplier",
+          "value": 0.7,
+          "duration_turns": 2
+        }
+      ]
+    }
+  ]
+}
