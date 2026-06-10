@@ -43,7 +43,9 @@ void EndingState::calculateEnding() {
     }
 
     ss << "\n\n[Нажмите Space, чтобы вернуться в Родовой Очаг]";
-    m_display->setText(sf::String::fromUtf8(ss.str().begin(), ss.str().end()), font, 26, sf::Color::White);
+    
+    std::string finalStr = ss.str();
+    m_display->setText(sf::String::fromUtf8(finalStr.begin(), finalStr.end()), font, 26, sf::Color::White);
 }
 
 void EndingState::handleInput() {

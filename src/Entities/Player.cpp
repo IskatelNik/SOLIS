@@ -1,5 +1,6 @@
 #include "Entities/Player.h"
 #include <algorithm>
+#include <random>
 
 namespace solis {
 
@@ -43,6 +44,26 @@ void Player::processTurnEffects() {
             ++it;
         }
     }
+}
+
+std::string Player::removeRandomArtifact() {
+    if (m_artifacts.empty()) return "";
+    
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, static_cast<int>(m_artifacts.size()) - 1);
+    
+    int index = dis(gen);
+    Artifact art = m_artifacts[index];
+    
+    // Reverse max_hp_flat logic
+    if (art.modifier_type == "max_hp_flat") {
+        m_maxHp -= static_cast<int>(art.value);
+        if (m_currentHp > m_maxHp) m_currentHp = m_maxHp;
+    }
+    
+    m_artifacts.erase(m_artifacts.begin() + index);
+    return art.name;
 }
 
 } // namespace solis

@@ -15,35 +15,49 @@ std::vector<DialogueGenerator::DialogueOption> DialogueGenerator::generateOption
     LoreItem correctLore = getBestLoreForTrait(target, currentLevel, unlocked);
     // Если лор не открыт (вернулась заглушка с target_trait == -1), это НЕ считается верным ответом
     bool isActuallyCorrect = (correctLore.target_trait == target);
-    options.push_back({correctLore.dialogue_option_text, target, isActuallyCorrect, !isActuallyCorrect});
+    options.push_back({correctLore.dialogue_option_text, target, isActuallyCorrect, false});
 
-    // 2. Нейтральные ответы (i-1, i+1)
-    int n1 = (target - 1 + 8) % 8;
-    int n2 = (target + 1) % 8;
-    
-    // MVP 5: Biome Modifiers (Level 2 disables neutral answers)
-    bool isNeutralValid = (currentLevel != 2);
-
-    LoreItem neutral1 = getBestLoreForTrait(n1, currentLevel, unlocked);
-    options.push_back({neutral1.dialogue_option_text, n1, false, isNeutralValid});
-    
-    LoreItem neutral2 = getBestLoreForTrait(n2, currentLevel, unlocked);
-    options.push_back({neutral2.dialogue_option_text, n2, false, isNeutralValid});
-
-    // 3. Неверный ответ (случайный из оставшихся)
-    std::vector<int> others;
-    for(int i=0; i<8; ++i) {
-        if(i != target && i != n1 && i != n2) others.push_back(i);
-    }
-    
     static std::random_device rd;
     static std::mt19937 gen(rd());
-    std::shuffle(others.begin(), others.end(), gen);
-    
-    int wrongTrait = others[0];
-    LoreItem wrongLore = getBestLoreForTrait(wrongTrait, currentLevel, unlocked);
-    // Неверный ответ никогда не бывает верным или нейтральным
-    options.push_back({wrongLore.dialogue_option_text, wrongTrait, false, false});
+
+    // MVP 5: Biome Modifiers (Level 2 disables neutral answers entirely)
+    if (currentLevel == 2) {
+        // На 2 уровне нет нейтральных ответов, генерируем 3 неверных
+        std::vector<int> others;
+        for(int i=0; i<8; ++i) {
+            if(i != target) others.push_back(i);
+        }
+        std::shuffle(others.begin(), others.end(), gen);
+        
+        for (int j = 0; j < 3; ++j) {
+            int wrongTrait = others[j];
+            LoreItem wrongLore = getBestLoreForTrait(wrongTrait, currentLevel, unlocked);
+            options.push_back({wrongLore.dialogue_option_text, wrongTrait, false, false});
+        }
+    } else {
+        // Стандартная генерация: 1 нейтральный, 2 неверных
+        int n1 = (target - 1 + 8) % 8;
+        int n2 = (target + 1) % 8;
+        
+        std::uniform_int_distribution<> coin(0, 1);
+        int chosenNeutral = (coin(gen) == 0) ? n1 : n2;
+        
+        LoreItem neutralLore = getBestLoreForTrait(chosenNeutral, currentLevel, unlocked);
+        options.push_back({neutralLore.dialogue_option_text, chosenNeutral, false, true});
+
+        std::vector<int> others;
+        for(int i=0; i<8; ++i) {
+            // Исключаем целевую черту и обе нейтральные (чтобы случайно не выдать вторую нейтральную как неверную)
+            if(i != target && i != n1 && i != n2) others.push_back(i);
+        }
+        std::shuffle(others.begin(), others.end(), gen);
+        
+        for (int j = 0; j < 2; ++j) {
+            int wrongTrait = others[j];
+            LoreItem wrongLore = getBestLoreForTrait(wrongTrait, currentLevel, unlocked);
+            options.push_back({wrongLore.dialogue_option_text, wrongTrait, false, false});
+        }
+    }
 
     // 4. Перемешиваем
     std::shuffle(options.begin(), options.end(), gen);
@@ -54,24 +68,27 @@ std::vector<DialogueGenerator::DialogueOption> DialogueGenerator::generateOption
 LoreItem DialogueGenerator::getBestLoreForTrait(int traitIndex, int currentLevel, const std::vector<std::string>& unlockedIds) {
     const auto& allLore = DataManager::getInstance().getLore();
     
-    // Ищем только в разблокированном лоре для этой черты
+    // Ищем в разблокированном лоре для этой черты (любого уровня)
     for (const auto& id : unlockedIds) {
-        const auto& lore = allLore.at(id);
-        if (lore.target_trait == traitIndex) {
-            return lore;
+        if (allLore.find(id) != allLore.end()) {
+            const auto& lore = allLore.at(id);
+            if (lore.target_trait == traitIndex) {
+                return lore;
+            }
         }
     }
     
-    // Если лор не найден или не разблокирован — возвращаем общую заглушку
-    return getPlaceholder();
+    // Если лор не найден или не разблокирован — возвращаем общую заглушку для этого уровня
+    return getPlaceholder(currentLevel);
 }
 
-LoreItem DialogueGenerator::getPlaceholder() {
+LoreItem DialogueGenerator::getPlaceholder(int currentLevel) {
     const auto& allLore = DataManager::getInstance().getLore();
     for (auto const& [id, lore] : allLore) {
-        if (lore.target_trait == -1) return lore;
+        if (lore.target_trait == -1 && lore.level == currentLevel) return lore;
     }
-    return {"placeholder", 1, -1, "...", "???"};
+    // Фолбэк на случай отсутствия заглушки нужного уровня
+    return {"placeholder", currentLevel, -1, "...", "???"};
 }
 
 } // namespace solis

@@ -9,10 +9,10 @@
     },
     {
       "id": "artifact_lens",
-      "name": "Фокусирующая линза",
-      "description": "Увеличивает получаемый Жар на 50% (для рискованных билдов)",
-      "modifier_type": "heat_gain_mult",
-      "value": 1.5
+      "name": "Уплотненная Линза",
+      "description": "Увеличивает максимальный запас прочности на 15 HP.",
+      "modifier_type": "max_hp_flat",
+      "value": 15.0
     }
   ]
 }

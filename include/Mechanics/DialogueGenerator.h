@@ -21,7 +21,7 @@ public:
 
 private:
     static LoreItem getBestLoreForTrait(int traitIndex, int currentLevel, const std::vector<std::string>& unlockedIds);
-    static LoreItem getPlaceholder();
+    static LoreItem getPlaceholder(int currentLevel);
 };
 
 } // namespace solis

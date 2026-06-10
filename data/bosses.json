@@ -4,8 +4,8 @@
       "id": "boss_vindict",
       "name": "Виндикт, Цепной Пес",
       "ascii_art": "data/ascii/vindict.txt",
-      "max_hp": 300,
-      "base_damage": 15,
+      "max_hp": 30,
+      "base_damage": 1,
       "sparks_reward": 100,
       "max_willpower": 3,
       "phases": [
@@ -16,7 +16,7 @@
           "boss_replica": "Ты думаешь, что твоя искра спасет этот мир? Мы — порядок. Вы — лишь топливо!",
           "success_reply": "Виндикт вздрагивает. Ваши слова о его прошлом пробивают брешь в его фанатизме.",
           "fail_reply": "Виндикт смеется: 'Жалкие бредни сгорающего!'",
-          "aggression_turns": 2
+          "aggression_turns": 0
         },
         {
           "willpower_left": 2,
@@ -34,7 +34,7 @@
           "boss_replica": "Почему... почему ты просто не сдашься? Я так устал от этой бесконечной бойни...",
           "success_reply": "Оружие выпадает из его рук. Воля Виндикта сломлена. Он падает на колени.",
           "fail_reply": "Он собирает последние силы для удара: 'Тогда мы умрем вместе!'",
-          "aggression_turns": 0
+          "aggression_turns": 4
         }
       ]
     }

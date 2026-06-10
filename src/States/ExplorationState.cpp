@@ -100,7 +100,15 @@ void ExplorationState::handleInput() {
             const Room& selectedRoom = m_currentOptions[choice];
             const sf::Font& font = ResourceManager::getInstance().getFont("main");
             
-            m_mainDisplay->setText(sf::String::fromUtf8(selectedRoom.description.begin(), selectedRoom.description.end()), font, 22, sf::Color::White);
+            std::string finalDesc = selectedRoom.description;
+            
+            // MVP 5 Biome 4 Update: +5% heat on entering non-combat room
+            if (RunManager::getInstance().getCurrentLevel() == 4 && selectedRoom.type != "combat" && selectedRoom.type != "boss") {
+                RunManager::getInstance().getPlayer().addHeat(5.0f);
+                finalDesc += "\n\n[ВЛИЯНИЕ УРОВНЯ: Окружающая среда обжигает (+5% ЖАРА)]";
+            }
+            
+            m_mainDisplay->setText(sf::String::fromUtf8(finalDesc.begin(), finalDesc.end()), font, 22, sf::Color::White);
             RunManager::getInstance().moveToRoom(selectedRoom);
 
             if (selectedRoom.type == "combat") {
@@ -122,8 +130,9 @@ void ExplorationState::handleInput() {
                 m_pendingEnemyId = "";
                 const auto& allLore = DataManager::getInstance().getLore();
                 std::vector<std::string> available;
+                int currentLevel = RunManager::getInstance().getCurrentLevel();
                 for (auto const& [id, lore] : allLore) {
-                    if (lore.target_trait != -1 && !RunManager::getInstance().isLoreUnlocked(id)) {
+                    if (lore.target_trait != -1 && lore.level == currentLevel && !RunManager::getInstance().isLoreUnlocked(id)) {
                         available.push_back(id);
                     }
                 }
@@ -257,13 +266,18 @@ void ExplorationState::handleInput() {
                 m_pendingEnemyId = "";
                 if (enemy) {
                     m_stateMachine.pushState(std::make_unique<CombatState>(m_window, m_stateMachine, std::move(enemy)));
-                    generateNextStep(); 
+                    // Мы не генерируем шаги здесь. Это сделает resume(), когда CombatState завершится.
                 }
             } else {
                 generateNextStep();
             }
         }
     }
+}
+
+void ExplorationState::resume() {
+    m_keyHeld = true; // Защита от случайных прокликиваний
+    generateNextStep();
 }
 
 void ExplorationState::update(float deltaTime) {}

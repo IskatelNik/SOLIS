@@ -41,6 +41,10 @@ file(GLOB_RECURSE PROJECT_SOURCES
 
 add_executable(SOLIS ${PROJECT_SOURCES})
 
+if(MSVC)
+    target_compile_options(SOLIS PRIVATE "/utf-8")
+endif()
+
 # 4. Указываем папки с заголовочными файлами
 target_include_directories(SOLIS PRIVATE src include)
 

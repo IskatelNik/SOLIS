@@ -20,6 +20,9 @@ void StateMachine::changeState(std::unique_ptr<State> newState) {
 void StateMachine::processStateChanges() {
     if (m_isRemoving && !m_states.empty()) {
         m_states.pop();
+        if (!m_states.empty() && !m_isAdding) {
+            m_states.top()->resume();
+        }
         m_isRemoving = false;
     }
 

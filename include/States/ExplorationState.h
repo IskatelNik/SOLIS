@@ -16,6 +16,7 @@ public:
     ExplorationState(sf::RenderWindow& window, StateMachine& stateMachine);
 
     void init() override;
+    void resume() override;
     void handleInput() override;
     void update(float deltaTime) override;
     void render(sf::RenderWindow& window) override;

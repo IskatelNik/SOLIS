@@ -20,8 +20,15 @@ public:
 
     // MVP 5: Modifiers
     float calculateHeatGain(float baseAmount) const;
-    void addArtifact(const Artifact& artifact) { m_artifacts.push_back(artifact); }
+    void addArtifact(const Artifact& artifact) { 
+        m_artifacts.push_back(artifact); 
+        if (artifact.modifier_type == "max_hp_flat") {
+            m_maxHp += static_cast<int>(artifact.value);
+            m_currentHp += static_cast<int>(artifact.value);
+        }
+    }
     void addStatusEffect(const StatusEffect& effect) { m_activeEffects.push_back(effect); }
+    std::string removeRandomArtifact(); // MVP 5 Biome 3 Update
     void processTurnEffects();
 
     // Эмпатия (MVP 3 Update)
