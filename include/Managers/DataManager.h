@@ -37,8 +37,9 @@ struct Upgrade {
     std::string description;
     int cost;
     std::string type;      // "passive_stat" or "active_skill"
-    std::string stat_type; // e.g., "hp_boost"
-    float value;
+    std::string skill_ref; // For active skills
+    std::string effect_target; // e.g., "max_hp", "overload_threshold"
+    float effect_value;
 };
 
 class DataManager {

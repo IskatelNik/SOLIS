@@ -26,13 +26,39 @@ void Player::reduceHeat(float amount) {
 }
 
 float Player::calculateHeatGain(float baseAmount) const {
-    float finalAmount = baseAmount;
-    for (const auto& artifact : m_artifacts) {
-        if (artifact.modifier_type == "heat_gain_mult") {
-            finalAmount *= artifact.value;
-        }
+    return baseAmount * getHeatGainMultiplier();
+}
+
+float Player::getOverloadThreshold() const {
+    float threshold = m_baseOverloadThreshold;
+    for (const auto& art : m_artifacts) {
+        if (art.modifier_type == "overload_threshold_flat") threshold += art.value;
     }
-    return finalAmount;
+    return threshold;
+}
+
+int Player::getBaseDamageBonus() const {
+    int bonus = m_baseDamageBonus;
+    for (const auto& art : m_artifacts) {
+        if (art.modifier_type == "base_damage_flat") bonus += (int)art.value;
+    }
+    return bonus;
+}
+
+float Player::getHeatGainMultiplier() const {
+    float mult = m_baseHeatGainMultiplier;
+    for (const auto& art : m_artifacts) {
+        if (art.modifier_type == "heat_reduction_multiplier") mult *= art.value;
+    }
+    return mult;
+}
+
+float Player::getDefenseMultiplier() const {
+    float mult = 1.0f;
+    for (const auto& art : m_artifacts) {
+        if (art.modifier_type == "defense_multiplier") mult *= art.value;
+    }
+    return mult;
 }
 
 void Player::processTurnEffects() {

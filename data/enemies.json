@@ -7,6 +7,7 @@
       "max_hp": 65,
       "base_damage": 12,
       "sparks_reward": 25,
+      "empathy_reveal_threshold": 150,
       "possible_traits": [
         {
           "trait": 2,
@@ -27,6 +28,7 @@
       "max_hp": 90,
       "base_damage": 22,
       "sparks_reward": 18,
+      "empathy_reveal_threshold": 140,
       "possible_traits": [
         {
           "trait": 6,
@@ -47,6 +49,7 @@
       "max_hp": 45,
       "base_damage": 18,
       "sparks_reward": 10,
+      "empathy_reveal_threshold": 150,
       "possible_traits": [
         {
           "trait": 0,
@@ -67,6 +70,7 @@
       "max_hp": 75,
       "base_damage": 16,
       "sparks_reward": 30,
+      "empathy_reveal_threshold": 160,
       "possible_traits": [
         {
           "trait": 2,
@@ -87,6 +91,7 @@
       "max_hp": 85,
       "base_damage": 14,
       "sparks_reward": 22,
+      "empathy_reveal_threshold": 170,
       "possible_traits": [
         {
           "trait": 7,
@@ -107,6 +112,7 @@
       "max_hp": 55,
       "base_damage": 10,
       "sparks_reward": 14,
+      "empathy_reveal_threshold": 140,
       "possible_traits": [
         {
           "trait": 4,
@@ -127,6 +133,7 @@
       "max_hp": 60,
       "base_damage": 15,
       "sparks_reward": 20,
+      "empathy_reveal_threshold": 170,
       "possible_traits": [
         {
           "trait": 0,
@@ -147,6 +154,7 @@
       "max_hp": 100,
       "base_damage": 18,
       "sparks_reward": 28,
+      "empathy_reveal_threshold": 210,
       "possible_traits": [
         {
           "trait": 7,
@@ -167,6 +175,7 @@
       "max_hp": 50,
       "base_damage": 12,
       "sparks_reward": 24,
+      "empathy_reveal_threshold": 150,
       "possible_traits": [
         {
           "trait": 2,
@@ -187,6 +196,7 @@
       "max_hp": 70,
       "base_damage": 25,
       "sparks_reward": 15,
+      "empathy_reveal_threshold": 130,
       "possible_traits": [
         {
           "trait": 6,
@@ -207,6 +217,7 @@
       "max_hp": 40,
       "base_damage": 6,
       "sparks_reward": 8,
+      "empathy_reveal_threshold": 70,
       "possible_traits": [
         {
           "trait": 5,
@@ -227,6 +238,7 @@
       "max_hp": 55,
       "base_damage": 9,
       "sparks_reward": 12,
+      "empathy_reveal_threshold": 70,
       "possible_traits": [
         {
           "trait": 6,
@@ -247,6 +259,7 @@
       "max_hp": 60,
       "base_damage": 7,
       "sparks_reward": 10,
+      "empathy_reveal_threshold": 90,
       "possible_traits": [
         {
           "trait": 3,
@@ -267,6 +280,7 @@
       "max_hp": 45,
       "base_damage": 5,
       "sparks_reward": 15,
+      "empathy_reveal_threshold": 60,
       "possible_traits": [
         {
           "trait": 4,
@@ -287,6 +301,7 @@
       "max_hp": 65,
       "base_damage": 12,
       "sparks_reward": 14,
+      "empathy_reveal_threshold": 100,
       "possible_traits": [
         {
           "trait": 7,
@@ -307,6 +322,7 @@
       "max_hp": 30,
       "base_damage": 15,
       "sparks_reward": 5,
+      "empathy_reveal_threshold": 50,
       "possible_traits": [
         {
           "trait": 0,
@@ -327,6 +343,7 @@
       "max_hp": 50,
       "base_damage": 8,
       "sparks_reward": 20,
+      "empathy_reveal_threshold": 50,
       "possible_traits": [
         {
           "trait": 2,
@@ -347,6 +364,7 @@
       "max_hp": 70,
       "base_damage": 10,
       "sparks_reward": 25,
+      "empathy_reveal_threshold": 100,
       "possible_traits": [
         {
           "trait": 1,
@@ -367,6 +385,7 @@
       "max_hp": 80,
       "base_damage": 14,
       "sparks_reward": 30,
+      "empathy_reveal_threshold": 110,
       "possible_traits": [
         {
           "trait": 3,
@@ -387,6 +406,7 @@
       "max_hp": 35,
       "base_damage": 4,
       "sparks_reward": 5,
+      "empathy_reveal_threshold": 40,
       "possible_traits": [
         {
           "trait": 4,
@@ -407,6 +427,7 @@
       "max_hp": 60,
       "base_damage": 12,
       "sparks_reward": 20,
+      "empathy_reveal_threshold": 270,
       "possible_traits": [
         {
           "trait": 3,
@@ -427,6 +448,7 @@
       "max_hp": 85,
       "base_damage": 22,
       "sparks_reward": 25,
+      "empathy_reveal_threshold": 310,
       "possible_traits": [
         {
           "trait": 6,
@@ -447,6 +469,7 @@
       "max_hp": 45,
       "base_damage": 8,
       "sparks_reward": 15,
+      "empathy_reveal_threshold": 240,
       "possible_traits": [
         {
           "trait": 5,
@@ -467,6 +490,7 @@
       "max_hp": 75,
       "base_damage": 15,
       "sparks_reward": 22,
+      "empathy_reveal_threshold": 260,
       "possible_traits": [
         {
           "trait": 1,
@@ -487,6 +511,7 @@
       "max_hp": 55,
       "base_damage": 18,
       "sparks_reward": 30,
+      "empathy_reveal_threshold": 280,
       "possible_traits": [
         {
           "trait": 2,
@@ -507,6 +532,7 @@
       "max_hp": 90,
       "base_damage": 10,
       "sparks_reward": 18,
+      "empathy_reveal_threshold": 220,
       "possible_traits": [
         {
           "trait": 4,
@@ -527,6 +553,7 @@
       "max_hp": 65,
       "base_damage": 16,
       "sparks_reward": 14,
+      "empathy_reveal_threshold": 260,
       "possible_traits": [
         {
           "trait": 0,
@@ -547,6 +574,7 @@
       "max_hp": 70,
       "base_damage": 14,
       "sparks_reward": 26,
+      "empathy_reveal_threshold": 300,
       "possible_traits": [
         {
           "trait": 0,
@@ -567,6 +595,7 @@
       "max_hp": 50,
       "base_damage": 6,
       "sparks_reward": 10,
+      "empathy_reveal_threshold": 230,
       "possible_traits": [
         {
           "trait": 4,
@@ -587,6 +616,7 @@
       "max_hp": 80,
       "base_damage": 18,
       "sparks_reward": 28,
+      "empathy_reveal_threshold": 310,
       "possible_traits": [
         {
           "trait": 1,
@@ -607,6 +637,7 @@
       "max_hp": 150,
       "base_damage": 30,
       "sparks_reward": 50,
+      "empathy_reveal_threshold": 350,
       "possible_traits": [
         {
           "trait": 0,
@@ -627,6 +658,7 @@
       "max_hp": 65,
       "base_damage": 15,
       "sparks_reward": 20,
+      "empathy_reveal_threshold": 320,
       "possible_traits": [
         {
           "trait": 6,
@@ -647,6 +679,7 @@
       "max_hp": 120,
       "base_damage": 25,
       "sparks_reward": 35,
+      "empathy_reveal_threshold": 370,
       "possible_traits": [
         {
           "trait": 1,
@@ -667,6 +700,7 @@
       "max_hp": 45,
       "base_damage": 8,
       "sparks_reward": 10,
+      "empathy_reveal_threshold": 330,
       "possible_traits": [
         {
           "trait": 4,
@@ -687,6 +721,7 @@
       "max_hp": 85,
       "base_damage": 20,
       "sparks_reward": 28,
+      "empathy_reveal_threshold": 380,
       "possible_traits": [
         {
           "trait": 2,
@@ -707,6 +742,7 @@
       "max_hp": 90,
       "base_damage": 35,
       "sparks_reward": 40,
+      "empathy_reveal_threshold": 390,
       "possible_traits": [
         {
           "trait": 7,
@@ -727,6 +763,7 @@
       "max_hp": 75,
       "base_damage": 18,
       "sparks_reward": 24,
+      "empathy_reveal_threshold": 340,
       "possible_traits": [
         {
           "trait": 0,
@@ -747,6 +784,7 @@
       "max_hp": 60,
       "base_damage": 14,
       "sparks_reward": 30,
+      "empathy_reveal_threshold": 340,
       "possible_traits": [
         {
           "trait": 2,
@@ -767,6 +805,7 @@
       "max_hp": 130,
       "base_damage": 28,
       "sparks_reward": 45,
+      "empathy_reveal_threshold": 410,
       "possible_traits": [
         {
           "trait": 7,
@@ -787,6 +826,7 @@
       "max_hp": 55,
       "base_damage": 10,
       "sparks_reward": 15,
+      "empathy_reveal_threshold": 330,
       "possible_traits": [
         {
           "trait": 3,

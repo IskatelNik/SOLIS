@@ -28,6 +28,7 @@ public:
         }
     }
     void addStatusEffect(const StatusEffect& effect) { m_activeEffects.push_back(effect); }
+    const std::vector<StatusEffect>& getStatusEffects() const { return m_activeEffects; }
     std::string removeRandomArtifact(); // MVP 5 Biome 3 Update
     void processTurnEffects();
 
@@ -42,8 +43,16 @@ public:
     float getHeat() const { return m_heat; }
     const std::vector<Skill>& getActiveSkills() const { return m_activeSkills; }
     
+    float getOverloadThreshold() const;
+    int getBaseDamageBonus() const;
+    float getHeatGainMultiplier() const;
+    float getDefenseMultiplier() const;
+    
     // For MVP 2 setup
     void setMaxHp(int val) { m_maxHp = val; m_currentHp = val; }
+    void setBaseOverloadThreshold(float val) { m_baseOverloadThreshold = val; }
+    void setBaseDamageBonus(int val) { m_baseDamageBonus = val; }
+    void setBaseHeatGainMultiplier(float val) { m_baseHeatGainMultiplier = val; }
     void addSkill(const Skill& skill) { m_activeSkills.push_back(skill); }
 
 private:
@@ -51,6 +60,11 @@ private:
     int m_currentHp = constants::PLAYER_DEFAULT_MAX_HP;
     float m_heat = 0.0f;
     int m_empathyLevel = 0;
+
+    // Base stats (modified by permanent upgrades at start of run)
+    float m_baseOverloadThreshold = constants::HEAT_OVERLOAD_THRESHOLD;
+    int m_baseDamageBonus = 0;
+    float m_baseHeatGainMultiplier = 1.0f;
 
     std::vector<Skill> m_activeSkills;
     std::vector<Artifact> m_artifacts;

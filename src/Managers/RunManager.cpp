@@ -21,28 +21,38 @@ void RunManager::startNewRun() {
     const SaveData& save = SaveManager::getInstance().getData();
     m_player = Player();
     
-    // 1. Применяем ПАССИВНЫЕ улучшения
+    // Применяем ПАССИВНЫЕ улучшения
     int hpBonus = 0;
+    float overloadBonus = 0.0f;
+    int damageBonus = 0;
     int empathyBonus = 0;
+    float heatGainMult = 1.0f;
+
     const auto& upgradeDb = DataManager::getInstance().getUpgrades();
 
     for (const auto& uid : save.unlocked_upgrades) {
         if (upgradeDb.count(uid)) {
             const auto& u = upgradeDb.at(uid);
             if (u.type == "passive_stat") {
-                if (u.stat_type == "hp_boost") hpBonus += (int)u.value;
-                else if (u.stat_type == "empathy_bonus") empathyBonus += (int)u.value;
+                if (u.effect_target == "max_hp") hpBonus += (int)u.effect_value;
+                else if (u.effect_target == "overload_threshold") overloadBonus += u.effect_value;
+                else if (u.effect_target == "base_damage") damageBonus += (int)u.effect_value;
+                else if (u.effect_target == "empathy_base") empathyBonus += (int)u.effect_value;
+                else if (u.effect_target == "heat_gain_multiplier") heatGainMult *= u.effect_value;
             }
         }
     }
     
     m_player.setMaxHp(constants::PLAYER_DEFAULT_MAX_HP + hpBonus);
+    m_player.setBaseOverloadThreshold(constants::HEAT_OVERLOAD_THRESHOLD + overloadBonus);
+    m_player.setBaseDamageBonus(damageBonus);
     m_player.setEmpathy(save.empathy_level + empathyBonus);
+    m_player.setBaseHeatGainMultiplier(heatGainMult);
 
-    // 2. Восстанавливаем открытый Лор
+    // Восстанавливаем открытый Лор
     m_unlockedLore = save.unlocked_lore;
     
-    // 3. Экипируем АКТИВНЫЕ навыки
+    // Экипируем АКТИВНЫЕ навыки
     const auto& skillDb = DataManager::getInstance().getSkills();
     
     // Если список пуст, даем базовый скилл (Solar Flare)
@@ -133,9 +143,14 @@ std::vector<Room> RunManager::getNextRoomOptions() {
         bossRoom.type = "boss";
         bossRoom.preview_text = "Огромные Врата (БОСС)";
         bossRoom.description = "За этими вратами скрывается страж этого сектора. Пути назад нет.";
-        // В зависимости от уровня ставим нужного босса. Для MVP 5 пока Виндикт на всех уровнях или только на 4.
-        // Пока хардкодим Виндикта для тестирования
-        bossRoom.possible_enemies = {"boss_vindict"}; 
+        
+        // Назначаем босса в зависимости от уровня
+        if (m_currentLevel == 1) bossRoom.possible_enemies = {"boss_libert"};
+        else if (m_currentLevel == 2) bossRoom.possible_enemies = {"boss_divit"};
+        else if (m_currentLevel == 3) bossRoom.possible_enemies = {"boss_mutat"};
+        else if (m_currentLevel == 4) bossRoom.possible_enemies = {"boss_vindict"};
+        else bossRoom.possible_enemies = {"boss_vindict"}; // Фолбэк
+        
         return { bossRoom };
     }
 

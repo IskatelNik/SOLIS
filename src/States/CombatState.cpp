@@ -113,9 +113,9 @@ void CombatState::updateUI() {
     } else if (m_currentMenu == CombatMenu::ConfirmSkill) {
         const auto& skills = m_player.getActiveSkills();
         const auto& skill = skills[m_selectedSkillIndex];
-        
+
         float heatMultiplier = 1.0f + (m_player.getHeat() / constants::HEAT_MAX);
-        int estDmg = (int)(skill.base_damage * heatMultiplier * m_enemy->getDefenseModifier());
+        int estDmg = (int)((skill.base_damage + m_player.getBaseDamageBonus()) * heatMultiplier * m_enemy->getDefenseModifier());
         float finalHeatCost = m_player.calculateHeatGain(skill.heat_cost_added);
 
         // MVP 5 Biome 3 Update: -40% damage, -70% heat cost
@@ -125,7 +125,7 @@ void CombatState::updateUI() {
         }
 
         menuText = skill.name + "\n" + skill.description + "\n";
-        menuText += "УРОН (актуальный): " + std::to_string(estDmg) + " | + ЖАР: " + std::to_string((int)finalHeatCost) + "%\n";
+        menuText += "+ ЖАР: " + std::to_string((int)finalHeatCost) + "%\n";
         menuText += "[1] ПОДТВЕРДИТЬ\n[0] Отмена";
     } else if (m_currentMenu == CombatMenu::Negotiate) {
         for (size_t i = 0; i < m_dialogueOptions.size(); ++i) {
@@ -195,7 +195,7 @@ void CombatState::handleInput() {
         if (num == 1) {
             const auto& skill = m_player.getActiveSkills()[m_selectedSkillIndex];
             float heatMultiplier = 1.0f + (m_player.getHeat() / constants::HEAT_MAX);
-            int dmg = (int)(skill.base_damage * heatMultiplier * m_enemy->getDefenseModifier());
+            int dmg = (int)((skill.base_damage + m_player.getBaseDamageBonus()) * heatMultiplier * m_enemy->getDefenseModifier());
             
             // MVP 5: Артефакты влияют на получение Жара
             float finalHeatCost = m_player.calculateHeatGain(skill.heat_cost_added);
@@ -212,11 +212,21 @@ void CombatState::handleInput() {
             
             // Накладываем эффекты
             for (const auto& eff : skill.effects) {
-                if (eff.target == "enemy") m_enemy->addStatusEffect({eff.type, eff.value, eff.duration_turns});
-                else m_player.addStatusEffect({eff.type, eff.value, eff.duration_turns});
+                if (eff.target == "enemy") {
+                    m_enemy->addStatusEffect({eff.type, eff.value, eff.duration_turns});
+                    if (eff.type == "debuff_defense_multiplier") {
+                        m_enemy->setDefenseModifier(m_enemy->getDefenseModifier() * eff.value);
+                    }
+                } else {
+                    m_player.addStatusEffect({eff.type, eff.value, eff.duration_turns});
+                    if (eff.type == "heal_flat") {
+                        m_player.heal((int)eff.value);
+                        logMessage("Вы восстановили " + std::to_string((int)eff.value) + " HP.");
+                    }
+                }
             }
 
-            logMessage("Вы используете " + skill.name + ". Урон: " + std::to_string(dmg));
+            logMessage("Вы используете " + skill.name + ".");
             
             m_playerTurn = false;
             level4HeatApplied = false;
@@ -328,6 +338,22 @@ void CombatState::handleInput() {
 }
 
 void CombatState::processTurnEnd() {
+    // Player DoT
+    for (const auto& eff : m_player.getStatusEffects()) {
+        if (eff.type == "damage_over_time") {
+            m_player.takeDamage((int)eff.value);
+            logMessage("Вы получаете " + std::to_string((int)eff.value) + " урона от горения.");
+        }
+    }
+
+    // Enemy DoT
+    for (const auto& eff : m_enemy->getStatusEffects()) {
+        if (eff.type == "damage_over_time") {
+            m_enemy->takeDamage((int)eff.value);
+            logMessage(m_enemy->getName() + " получает " + std::to_string((int)eff.value) + " урона от горения.");
+        }
+    }
+
     m_player.processTurnEffects();
     m_enemy->processTurnEffects();
     
@@ -339,12 +365,28 @@ void CombatState::processTurnEnd() {
 }
 
 void CombatState::enemyTurn() {
-    int dmg = (int)(m_enemy->getBaseDamage() * m_enemy->getDamageModifier());
+    float dmgMult = 1.0f;
+    for (const auto& eff : m_enemy->getStatusEffects()) {
+        if (eff.type == "debuff_damage_multiplier") dmgMult *= eff.value;
+        else if (eff.type == "buff_damage_multiplier") dmgMult *= eff.value;
+    }
+
+    float defMult = m_player.getDefenseMultiplier();
+    for (const auto& eff : m_player.getStatusEffects()) {
+        if (eff.type == "buff_defense_multiplier") defMult *= eff.value;
+    }
+
+    int dmg = (int)(m_enemy->getBaseDamage() * m_enemy->getDamageModifier() * dmgMult * defMult);
     m_player.takeDamage(dmg);
     logMessage(m_enemy->getName() + " атакует! Урон: " + std::to_string(dmg));
 
-    if (m_player.getHeat() > constants::HEAT_OVERLOAD_THRESHOLD) {
-        int overloadDmg = (int)((m_player.getHeat() - constants::HEAT_OVERLOAD_THRESHOLD) * constants::HEAT_DAMAGE_MULT);
+    float overloadThreshold = m_player.getOverloadThreshold();
+    for (const auto& eff : m_player.getStatusEffects()) {
+        if (eff.type == "buff_overload_threshold") overloadThreshold += eff.value;
+    }
+
+    if (m_player.getHeat() > overloadThreshold) {
+        int overloadDmg = (int)((m_player.getHeat() - overloadThreshold) * constants::HEAT_DAMAGE_MULT);
         m_player.takeDamage(overloadDmg);
         logMessage("ПЕРЕГРУЗКА! Системы горят. Урон: " + std::to_string(overloadDmg));
     }
