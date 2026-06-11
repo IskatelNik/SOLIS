@@ -17,12 +17,6 @@ Game::Game(const std::string& title, unsigned int width, unsigned int height)
         std::cerr << "[Game] Warning: Default font not found at assets/fonts/font_main.ttf" << std::endl;
     }
 
-    // Загружаем ASCII шрифт (если не найден, используем main как фоллбэк)
-    if (!ResourceManager::getInstance().loadFont("ascii", "assets/fonts/font_ascii.ttf")) {
-        std::cerr << "[Game] Warning: ASCII font not found, falling back to main font." << std::endl;
-        ResourceManager::getInstance().loadFont("ascii", "assets/fonts/font_main.ttf");
-    }
-
     // Загружаем базы данных
     DataManager::getInstance().loadRooms("data/rooms.json");
     DataManager::getInstance().loadEnemies("data/enemies.json");

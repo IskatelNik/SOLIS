@@ -36,10 +36,8 @@ private:
     StateMachine& m_stateMachine;
 
     std::unique_ptr<UIBox> m_topBar;
-    std::unique_ptr<UIBox> m_mainDisplayLeft;
-    std::unique_ptr<UIBox> m_mainDisplayRight;
-    std::unique_ptr<UIBox> m_actionMenuLeft;
-    std::unique_ptr<UIBox> m_actionMenuRight;
+    std::unique_ptr<UIBox> m_mainDisplay;
+    std::unique_ptr<UIBox> m_actionMenu;
 
     HubMenu m_currentMenu = HubMenu::Main;
     std::vector<std::string> m_shopUpgradeIds;
