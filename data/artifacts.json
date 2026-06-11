@@ -2,17 +2,143 @@
   "artifacts": [
     {
       "id": "artifact_cooler",
-      "name": "Древний Охладитель",
-      "description": "Снижает получаемый Жар на 20%",
-      "modifier_type": "heat_gain_mult",
+      "name": "Охладитель",
+      "description": "Сломанный блок климат-контроля. Снижает получение Жара от использования магии на 20%.",
+      "modifier_type": "heat_reduction_multiplier",
       "value": 0.8
     },
     {
-      "id": "artifact_lens",
-      "name": "Уплотненная Линза",
-      "description": "Увеличивает максимальный запас прочности на 15 HP.",
+      "id": "artifact_armor_plate",
+      "name": "Бронепластина",
+      "description": "Тяжелый кусок заводской стали, который можно спрятать под одеждой. Увеличивает максимальное здоровье на 20.",
+      "modifier_type": "max_hp_flat",
+      "value": 20.0
+    },
+    {
+      "id": "artifact_asbestos_wrap",
+      "name": "Асбестовая обмотка",
+      "description": "Кусок ткани от плаща смотрителя тигеля. Отодвигает порог получения урона от Перегрузки на 5%.",
+      "modifier_type": "overload_threshold_flat",
+      "value": 5.0
+    },
+    {
+      "id": "artifact_lead_flask",
+      "name": "Свинцовая колба",
+      "description": "Контрабандисты используют такие для кражи Жара. Снижает получение Жара от использования магии на 15%.",
+      "modifier_type": "heat_reduction_multiplier",
+      "value": 0.85
+    },
+    {
+      "id": "artifact_rusted_cleaver",
+      "name": "Ржавый тесак",
+      "description": "Тупое оружие тюремного повара, пропитанное кровью. Увеличивает базовый урон на 3 единицы.",
+      "modifier_type": "base_damage_flat",
+      "value": 3.0
+    },
+    {
+      "id": "artifact_clockwork_heart",
+      "name": "Заводное сердце",
+      "description": "Тикающий механизм, извлеченный из сломанного автоматона. Увеличивает максимальное здоровье на 15.",
       "modifier_type": "max_hp_flat",
       "value": 15.0
+    },
+    {
+      "id": "artifact_copper_gauge",
+      "name": "Медный манометр",
+      "description": "Треснувший прибор с мануфактуры. Помогает лучше контролировать тепло. Снижает получение Жара на 10%.",
+      "modifier_type": "heat_reduction_multiplier",
+      "value": 0.9
+    },
+    {
+      "id": "artifact_brass_knuckles",
+      "name": "Латунный кастет",
+      "description": "Оружие карателей, подавляющих бунты. Увеличивает базовый урон на 5 единиц.",
+      "modifier_type": "base_damage_flat",
+      "value": 5.0
+    },
+    {
+      "id": "artifact_pure_crystal",
+      "name": "Осколок кристалла",
+      "description": "Остаток чистой энергии Солиса из лабораторий Мутата. Увеличивает максимальное здоровье на 25.",
+      "modifier_type": "max_hp_flat",
+      "value": 25.0
+    },
+    {
+      "id": "artifact_golden_gear",
+      "name": "Золотая шестеренка",
+      "description": "Деталь из покоев лорда Виндикта. Удивительно прочная. Снижает получаемый урон на 10%.",
+      "modifier_type": "defense_multiplier",
+      "value": 0.9
+    },
+    {
+      "id": "artifact_melted_locket",
+      "name": "Оплавленный медальон",
+      "description": "Память о чьей-то разрушенной семье. Напоминает, за что вы сражаетесь. Увеличивает максимальное здоровье на 10.",
+      "modifier_type": "max_hp_flat",
+      "value": 10.0
+    },
+    {
+      "id": "artifact_heavy_shackle",
+      "name": "Тяжелые кандалы",
+      "description": "Кусок цепи, обмотанный вокруг кулака. Увеличивает базовый урон на 4 единицы.",
+      "modifier_type": "base_damage_flat",
+      "value": 4.0
+    },
+    {
+      "id": "artifact_hazmat_filter",
+      "name": "Респираторный фильтр",
+      "description": "Прорезиненный фильтр, спасающий от химикатов и смога. Снижает получаемый урон на 15%.",
+      "modifier_type": "defense_multiplier",
+      "value": 0.85
+    },
+    {
+      "id": "artifact_warden_brand",
+      "name": "Клеймо надзирателя",
+      "description": "Железный прут, которым пытали ваших сородичей. Теперь он обжигает врагов. Увеличивает базовый урон на 6 единиц.",
+      "modifier_type": "base_damage_flat",
+      "value": 6.0
+    },
+    {
+      "id": "artifact_glass_prism",
+      "name": "Стеклянная призма",
+      "description": "Инструмент алхимиков для рассеивания света. Снижает получение Жара от использования магии на 25%.",
+      "modifier_type": "heat_reduction_multiplier",
+      "value": 0.75
+    },
+    {
+      "id": "artifact_martyr_ash",
+      "name": "Прах мученика",
+      "description": "Горстка пепла из великой Печи. Хранит в себе стойкость предков. Отодвигает порог Перегрузки на 10%.",
+      "modifier_type": "overload_threshold_flat",
+      "value": 10.0
+    },
+    {
+      "id": "artifact_mutat_syringe",
+      "name": "Игла Мутата",
+      "description": "Медицинский инструмент, предназначенный для вскрытия плоти. Снижает получаемый урон на 20%.",
+      "modifier_type": "defense_multiplier",
+      "value": 0.8
+    },
+    {
+      "id": "artifact_cooled_ember",
+      "name": "Остывший уголь",
+      "description": "Кусок породы, впитавший в себя ледяной сквозняк катакомб. Отодвигает порог Перегрузки на 15%.",
+      "modifier_type": "overload_threshold_flat",
+      "value": 15.0
+    },
+    {
+      "id": "artifact_vindict_chain",
+      "name": "Цепь Виндикта",
+      "description": "Фрагмент оружия палача. Напоминает о жестокости Империи. Увеличивает базовый урон на 8 единиц.",
+      "modifier_type": "base_damage_flat",
+      "value": 8.0
+    },
+    {
+      "id": "artifact_equilibrio_seal",
+      "name": "Печать Эквилибра",
+      "description": "Древний символ эпохи равенства людей и солюмнов. Увеличивает максимальное здоровье на 30.",
+      "modifier_type": "max_hp_flat",
+      "value": 30.0
     }
   ]
 }

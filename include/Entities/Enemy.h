@@ -67,6 +67,7 @@ public:
     void setDrainable(bool drainable) { m_isDrainable = drainable; }
 
     void addStatusEffect(const StatusEffect& effect) { m_activeEffects.push_back(effect); }
+    const std::vector<StatusEffect>& getStatusEffects() const { return m_activeEffects; }
     void processTurnEffects();
 
 private:

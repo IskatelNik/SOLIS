@@ -68,11 +68,11 @@ std::vector<DialogueGenerator::DialogueOption> DialogueGenerator::generateOption
 LoreItem DialogueGenerator::getBestLoreForTrait(int traitIndex, int currentLevel, const std::vector<std::string>& unlockedIds) {
     const auto& allLore = DataManager::getInstance().getLore();
     
-    // Ищем в разблокированном лоре для этой черты (любого уровня)
+    // Ищем в разблокированном лоре для этой черты ТОЛЬКО для текущего уровня
     for (const auto& id : unlockedIds) {
         if (allLore.find(id) != allLore.end()) {
             const auto& lore = allLore.at(id);
-            if (lore.target_trait == traitIndex) {
+            if (lore.target_trait == traitIndex && lore.level == currentLevel) {
                 return lore;
             }
         }

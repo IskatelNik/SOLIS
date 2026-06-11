@@ -44,7 +44,16 @@ void HubState::updateUI() {
     if (m_currentMenu == HubMenu::Main) {
         ss << "Древнее пламя мерцает в центре зала. Вы чувствуете покой и силу предков.\n\n";
         ss << "ТЕКУЩИЙ СТАТУС:\n";
-        ss << "- Макс. HP: " << (constants::PLAYER_DEFAULT_MAX_HP + (std::count(save.unlocked_upgrades.begin(), save.unlocked_upgrades.end(), "upgrade_hp_1") * 20)) << "\n";
+        int hpBonus = 0;
+        const auto& upgradeDb = DataManager::getInstance().getUpgrades();
+        for (const auto& uid : save.unlocked_upgrades) {
+            if (upgradeDb.count(uid)) {
+                const auto& u = upgradeDb.at(uid);
+                if (u.type == "passive_stat" && u.effect_target == "max_hp") hpBonus += (int)u.effect_value;
+            }
+        }
+
+        ss << "- Макс. HP: " << (constants::PLAYER_DEFAULT_MAX_HP + hpBonus) << "\n";
         ss << "- Экипировано навыков: " << save.equipped_skills.size() << "/3\n";
         ss << "- Знаний в архиве: " << save.unlocked_lore.size();
         
@@ -91,17 +100,21 @@ void HubState::updateUI() {
         available.push_back("skill_solar_flare");
         for (const auto& uid : save.unlocked_upgrades) {
             if (DataManager::getInstance().getUpgrades().count(uid)) {
-                if (DataManager::getInstance().getUpgrades().at(uid).type == "active_skill") {
-                    available.push_back(uid);
+                const auto& upg = DataManager::getInstance().getUpgrades().at(uid);
+                if (upg.type == "active_skill" && !upg.skill_ref.empty()) {
+                    if (std::find(available.begin(), available.end(), upg.skill_ref) == available.end()) {
+                        available.push_back(upg.skill_ref);
+                    }
                 }
             }
         }
 
-        // УДАЛЕНО ОГРАНИЧЕНИЕ i < 3
         for (size_t i = 0; i < available.size(); ++i) {
-            const auto& skill = DataManager::getInstance().getSkills().at(available[i]);
-            bool isEquipped = std::find(save.equipped_skills.begin(), save.equipped_skills.end(), available[i]) != save.equipped_skills.end();
-            as << "[" << (i+1) << "] " << (isEquipped ? "[V] " : "[ ] ") << skill.name << "\n";
+            if (DataManager::getInstance().getSkills().count(available[i])) {
+                const auto& skill = DataManager::getInstance().getSkills().at(available[i]);
+                bool isEquipped = std::find(save.equipped_skills.begin(), save.equipped_skills.end(), available[i]) != save.equipped_skills.end();
+                as << "[" << (i+1) << "] " << (isEquipped ? "[V] " : "[ ] ") << skill.name << "\n";
+            }
         }
         as << "\n[0] Назад";
     }
@@ -154,8 +167,14 @@ void HubState::handleInput() {
              std::vector<std::string> available;
              available.push_back("skill_solar_flare");
              for (const auto& uid : SaveManager::getInstance().getData().unlocked_upgrades) {
-                if (DataManager::getInstance().getUpgrades().count(uid) && DataManager::getInstance().getUpgrades().at(uid).type == "active_skill")
-                    available.push_back(uid);
+                if (DataManager::getInstance().getUpgrades().count(uid)) {
+                    const auto& upg = DataManager::getInstance().getUpgrades().at(uid);
+                    if (upg.type == "active_skill" && !upg.skill_ref.empty()) {
+                        if (std::find(available.begin(), available.end(), upg.skill_ref) == available.end()) {
+                            available.push_back(upg.skill_ref);
+                        }
+                    }
+                }
              }
              if (num > 0 && (size_t)num <= available.size()) {
                  toggleSkill(available[num-1]);

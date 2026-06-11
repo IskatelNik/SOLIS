@@ -109,7 +109,9 @@ bool DataManager::loadLore(const std::string& filepath) {
     try {
         nlohmann::json j;
         file >> j;
-        for (const auto& item : j["lore"]) {
+        if (!j.contains("lore_items")) return false;
+        
+        for (const auto& item : j["lore_items"]) {
             LoreItem lore;
             lore.id = item["id"];
             lore.level = item.value("level", 1);
@@ -136,8 +138,9 @@ bool DataManager::loadUpgrades(const std::string& filepath) {
             upg.description = item["description"];
             upg.cost = item.value("cost", 50);
             upg.type = item.value("type", "passive_stat");
-            upg.stat_type = item.value("stat_type", "");
-            upg.value = item.value("value", 0.0f);
+            upg.skill_ref = item.value("skill_ref", "");
+            upg.effect_target = item.value("effect_target", "");
+            upg.effect_value = item.value("effect_value", 0.0f);
             m_upgrades[upg.id] = upg;
         }
         return true;
@@ -171,25 +174,39 @@ bool DataManager::loadEvents(const std::string& filepath) {
     try {
         nlohmann::json j;
         file >> j;
-        for (const auto& item : j["events"]) {
-            Event ev;
-            ev.id = item["id"];
-            ev.level = item.value("level", 1);
-            ev.order_index = item.value("order_index", 0);
-            ev.title = item["title"];
-            ev.description = item["description"];
-            
-            ev.choice_ficio.text = item["choice_ficio"]["text"];
-            ev.choice_ficio.heat_change = item["choice_ficio"]["heat_change"];
-            ev.choice_ficio.ideology_change = item["choice_ficio"]["ideology_change"];
-            ev.choice_ficio.result_text = item["choice_ficio"]["result_text"];
-            
-            ev.choice_finesa.text = item["choice_finesa"]["text"];
-            ev.choice_finesa.heat_change = item["choice_finesa"]["heat_change"];
-            ev.choice_finesa.ideology_change = item["choice_finesa"]["ideology_change"];
-            ev.choice_finesa.result_text = item["choice_finesa"]["result_text"];
+        if (!j.contains("events")) return false;
 
-            m_events[ev.id] = ev;
+        const auto& levels = j["events"];
+        for (auto it = levels.begin(); it != levels.end(); ++it) {
+            std::string levelStr = it.key(); // e.g., "level_1"
+            int level = 1;
+            try {
+                if (levelStr.find("level_") == 0) {
+                    level = std::stoi(levelStr.substr(6));
+                }
+            } catch (...) {}
+
+            int order_index = 0;
+            for (const auto& item : it.value()) {
+                Event ev;
+                ev.id = item["id"];
+                ev.level = level;
+                ev.order_index = order_index++;
+                ev.preview_text = item.value("preview_text", "");
+                ev.description = item["description"];
+                
+                if (item.contains("choices")) {
+                    for (const auto& choiceJ : item["choices"]) {
+                        EventChoice choice;
+                        choice.text = choiceJ.value("text", "");
+                        choice.heat_change = choiceJ.value("heat_change", 0.0f);
+                        choice.ideology_change = choiceJ.value("ideology_change", 0);
+                        ev.choices.push_back(choice);
+                    }
+                }
+
+                m_events[ev.id] = ev;
+            }
         }
         return true;
     } catch (...) { return false; }

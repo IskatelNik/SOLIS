@@ -1,0 +1,39 @@
+{
+  "upgrades": [
+    {
+      "id": "upgrade_hp_1",
+      "name": "Закаленная оболочка I",
+      "description": "+20 к максимальному HP",
+      "cost": 50,
+      "type": "passive_stat",
+      "stat_type": "hp_boost",
+      "value": 20.0
+    },
+    {
+      "id": "upgrade_heat_cap_1",
+      "name": "Теплоотвод I",
+      "description": "Порог перегрева увеличен на 10%",
+      "cost": 75,
+      "type": "passive_stat",
+      "stat_type": "heat_threshold",
+      "value": 10.0
+    },
+    {
+      "id": "upgrade_empathy_1",
+      "name": "Настройка сенсоров",
+      "description": "Постоянный бонус +5 к Эмпатии",
+      "cost": 100,
+      "type": "passive_stat",
+      "stat_type": "empathy_bonus",
+      "value": 5.0
+    },
+    {
+      "id": "skill_blinding_light",
+      "name": "Навык: Ослепляющий Свет",
+      "description": "Разблокирует боевой навык 'Ослепляющий Свет'",
+      "cost": 120,
+      "type": "active_skill",
+      "value": 0.0
+    }
+  ]
+}

@@ -175,10 +175,13 @@ void ExplorationState::handleInput() {
                 
                 if (currentEvent) {
                     m_pendingEvent = currentEvent;
-                    std::string text = currentEvent->title + "\n\n" + currentEvent->description;
+                    std::string text = currentEvent->preview_text + "\n\n" + currentEvent->description;
                     m_mainDisplay->setText(sf::String::fromUtf8(text.begin(), text.end()), font, 22, sf::Color::White);
                     
-                    std::string menuChoices = "[1] " + currentEvent->choice_ficio.text + "\n[2] " + currentEvent->choice_finesa.text;
+                    std::string menuChoices;
+                    for (size_t i = 0; i < currentEvent->choices.size(); ++i) {
+                        menuChoices += "[" + std::to_string(i + 1) + "] " + currentEvent->choices[i].text + (i < currentEvent->choices.size() - 1 ? "\n" : "");
+                    }
                     m_actionMenu->setText(sf::String::fromUtf8(menuChoices.begin(), menuChoices.end()), font, 24, sf::Color::Green);
                 } else {
                     std::string msg = "ПУСТОТА\n\nЗдесь больше нет событий.";
@@ -230,20 +233,32 @@ void ExplorationState::handleInput() {
             int evChoice = -1;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num1)) evChoice = 1;
             else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num2)) evChoice = 2;
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num3)) evChoice = 3;
 
-            if (evChoice == 1 || evChoice == 2) {
+            if (evChoice >= 1 && evChoice <= static_cast<int>(m_pendingEvent->choices.size())) {
                 m_keyHeld = true;
-                const EventChoice& choice = (evChoice == 1) ? m_pendingEvent->choice_ficio : m_pendingEvent->choice_finesa;
+                const EventChoice& choice = m_pendingEvent->choices[evChoice - 1];
                 
                 Player& player = RunManager::getInstance().getPlayer();
                 if (choice.heat_change > 0) player.addHeat(choice.heat_change);
-                else player.reduceHeat(-choice.heat_change);
+                else if (choice.heat_change < 0) player.reduceHeat(-choice.heat_change);
                 
                 RunManager::getInstance().modifyIdeologyScore(choice.ideology_change);
                 RunManager::getInstance().incrementEventProgress(m_pendingEvent->level);
                 
                 const sf::Font& font = ResourceManager::getInstance().getFont("main");
-                m_mainDisplay->setText(sf::String::fromUtf8(choice.result_text.begin(), choice.result_text.end()), font, 22, constants::COLOR_LORE_DISCOVERY);
+                
+                std::stringstream ss;
+                ss << "ВЫБОР СДЕЛАН\n\n";
+                if (choice.heat_change != 0) {
+                    ss << (choice.heat_change > 0 ? "[ЖАР УВЕЛИЧЕН: " : "[ЖАР УМЕНЬШЕН: ") << (int)std::abs(choice.heat_change) << "%]\n";
+                }
+                if (choice.ideology_change != 0) {
+                    ss << (choice.ideology_change > 0 ? "[ПУТЬ: СОЛИДАРНОСТЬ]" : "[ПУТЬ: ПРАГМАТИЗМ]") << "\n";
+                }
+                std::string result = ss.str();
+
+                m_mainDisplay->setText(sf::String::fromUtf8(result.begin(), result.end()), font, 22, constants::COLOR_LORE_DISCOVERY);
                 std::string prompt = "[Space] Продолжить...";
                 m_actionMenu->setText(sf::String::fromUtf8(prompt.begin(), prompt.end()), font, 24, sf::Color::Yellow);
                 m_pendingEvent = nullptr;
