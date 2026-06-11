@@ -5,11 +5,18 @@
 
 namespace solis {
 
+/**
+ * @brief Синглтон для работы с файловой системой и сохранением прогресса.
+ */
 SaveManager& SaveManager::getInstance() {
     static SaveManager instance;
     return instance;
 }
 
+/**
+ * @brief Загружает данные игрока из JSON-файла. 
+ * Если файл отсутствует — создает новый с начальными параметрами.
+ */
 bool SaveManager::load() {
     std::ifstream file(constants::SAVE_FILE_PATH);
     if (!file.is_open()) {
@@ -22,6 +29,7 @@ bool SaveManager::load() {
         nlohmann::json j;
         file >> j;
 
+        // Десериализация основных параметров
         m_data.solis_sparks = j.value("solis_sparks", 0);
         m_data.empathy_level = j.value("empathy_level", 0);
         m_data.unlocked_lore = j.value("unlocked_lore", std::vector<std::string>{});
@@ -31,6 +39,7 @@ bool SaveManager::load() {
         m_data.mercy_counter = j.value("mercy_counter", 0);
         m_data.ideology_score = j.value("ideology_score", 0);
         
+        // Обработка прогресса текстовых квестов
         if (j.contains("event_progress")) {
             for (auto& el : j["event_progress"].items()) {
                 m_data.event_progress[std::stoi(el.key())] = el.value();
@@ -44,6 +53,9 @@ bool SaveManager::load() {
     }
 }
 
+/**
+ * @brief Сериализует текущие данные в JSON и записывает на диск.
+ */
 bool SaveManager::save() {
     nlohmann::json j;
     j["solis_sparks"] = m_data.solis_sparks;

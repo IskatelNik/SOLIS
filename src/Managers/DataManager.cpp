@@ -5,11 +5,17 @@
 
 namespace solis {
 
+/**
+ * @brief Синглтон для доступа к глобальным данным игры.
+ */
 DataManager& DataManager::getInstance() {
     static DataManager instance;
     return instance;
 }
 
+/**
+ * @brief Загружает базу данных комнат из JSON.
+ */
 bool DataManager::loadRooms(const std::string& filepath) {
     std::ifstream file(filepath);
     if (!file.is_open()) {
@@ -43,6 +49,9 @@ bool DataManager::loadRooms(const std::string& filepath) {
     }
 }
 
+/**
+ * @brief Загружает шаблоны обычных врагов.
+ */
 bool DataManager::loadEnemies(const std::string& filepath) {
     std::ifstream file(filepath);
     if (!file.is_open()) return false;
@@ -57,6 +66,9 @@ bool DataManager::loadEnemies(const std::string& filepath) {
     } catch (...) { return false; }
 }
 
+/**
+ * @brief Загружает шаблоны боссов и их фаз.
+ */
 bool DataManager::loadBosses(const std::string& filepath) {
     std::ifstream file(filepath);
     if (!file.is_open()) return false;
@@ -71,6 +83,9 @@ bool DataManager::loadBosses(const std::string& filepath) {
     } catch (...) { return false; }
 }
 
+/**
+ * @brief Загружает активные навыки игрока.
+ */
 bool DataManager::loadSkills(const std::string& filepath) {
     std::ifstream file(filepath);
     if (!file.is_open()) return false;
@@ -102,6 +117,9 @@ bool DataManager::loadSkills(const std::string& filepath) {
     } catch (...) { return false; }
 }
 
+/**
+ * @brief Загружает записи лора для социальной системы боя.
+ */
 bool DataManager::loadLore(const std::string& filepath) {
     std::ifstream file(filepath);
     if (!file.is_open()) return false;
@@ -124,6 +142,9 @@ bool DataManager::loadLore(const std::string& filepath) {
     } catch (...) { return false; }
 }
 
+/**
+ * @brief Загружает доступные улучшения в Хабе.
+ */
 bool DataManager::loadUpgrades(const std::string& filepath) {
     std::ifstream file(filepath);
     if (!file.is_open()) return false;
@@ -147,6 +168,9 @@ bool DataManager::loadUpgrades(const std::string& filepath) {
     } catch (...) { return false; }
 }
 
+/**
+ * @brief Загружает базу данных артефактов.
+ */
 bool DataManager::loadArtifacts(const std::string& filepath) {
     std::ifstream file(filepath);
     if (!file.is_open()) return false;
@@ -167,6 +191,9 @@ bool DataManager::loadArtifacts(const std::string& filepath) {
     } catch (...) { return false; }
 }
 
+/**
+ * @brief Загружает текстовые квесты/события, сгруппированные по уровням.
+ */
 bool DataManager::loadEvents(const std::string& filepath) {
     std::ifstream file(filepath);
     if (!file.is_open()) return false;
@@ -178,7 +205,7 @@ bool DataManager::loadEvents(const std::string& filepath) {
 
         const auto& levels = j["events"];
         for (auto it = levels.begin(); it != levels.end(); ++it) {
-            std::string levelStr = it.key(); // e.g., "level_1"
+            std::string levelStr = it.key(); 
             int level = 1;
             try {
                 if (levelStr.find("level_") == 0) {
@@ -212,6 +239,9 @@ bool DataManager::loadEvents(const std::string& filepath) {
     } catch (...) { return false; }
 }
 
+/**
+ * @brief Создает новый экземпляр врага на основе ID шаблона.
+ */
 std::unique_ptr<Enemy> DataManager::spawnEnemy(const std::string& id) {
     if (m_enemyTemplates.find(id) == m_enemyTemplates.end()) return nullptr;
 
@@ -224,6 +254,7 @@ std::unique_ptr<Enemy> DataManager::spawnEnemy(const std::string& id) {
     enemy->setSparksReward(j.value("sparks_reward", 10));
     enemy->setEmpathyRevealThreshold(j.value("empathy_reveal_threshold", 20));
 
+    // Выбор случайной черты характера для социальной боевки
     if (j.contains("possible_traits")) {
         const auto& traits = j["possible_traits"];
         if (!traits.empty()) {
@@ -243,6 +274,9 @@ std::unique_ptr<Enemy> DataManager::spawnEnemy(const std::string& id) {
     return enemy;
 }
 
+/**
+ * @brief Создает новый экземпляр босса на основе ID шаблона.
+ */
 std::unique_ptr<BossEnemy> DataManager::spawnBoss(const std::string& id) {
     if (m_bossTemplates.find(id) == m_bossTemplates.end()) return nullptr;
 
@@ -251,7 +285,7 @@ std::unique_ptr<BossEnemy> DataManager::spawnBoss(const std::string& id) {
     boss->setId(id);
     boss->setName(j.value("name", "Unknown Boss"));
     boss->setMaxHp(j.value("max_hp", 200));
-    boss->setBaseDamage(j.value("base_damage", 15)); // Base damage moved to root
+    boss->setBaseDamage(j.value("base_damage", 15));
     boss->setMaxWillpower(j.value("max_willpower", 3));
     boss->setSparksReward(j.value("sparks_reward", 50));
 

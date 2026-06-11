@@ -7,6 +7,9 @@
 
 namespace solis {
 
+/**
+ * @brief Синглтон для управления состоянием текущего забега.
+ */
 RunManager& RunManager::getInstance() {
     static RunManager instance;
     return instance;
@@ -14,6 +17,9 @@ RunManager& RunManager::getInstance() {
 
 RunManager::RunManager() {}
 
+/**
+ * @brief Инициализирует новый забег, применяя все купленные улучшения и выбранные навыки.
+ */
 void RunManager::startNewRun() {
     m_currentLevel = 1;
     m_currentRoomIndex = 0;
@@ -21,7 +27,7 @@ void RunManager::startNewRun() {
     const SaveData& save = SaveManager::getInstance().getData();
     m_player = Player();
     
-    // Применяем ПАССИВНЫЕ улучшения
+    // Применение ПАССИВНЫХ бонусов от улучшений Хаба
     int hpBonus = 0;
     float overloadBonus = 0.0f;
     int damageBonus = 0;
@@ -49,14 +55,14 @@ void RunManager::startNewRun() {
     m_player.setEmpathy(save.empathy_level + empathyBonus);
     m_player.setBaseHeatGainMultiplier(heatGainMult);
 
-    // Восстанавливаем открытый Лор
+    // Восстановление открытого Лора для использования в диалогах
     m_unlockedLore = save.unlocked_lore;
     
-    // Экипируем АКТИВНЫЕ навыки
+    // Экипировка АКТИВНЫХ навыков из Хаба
     const auto& skillDb = DataManager::getInstance().getSkills();
     
-    // Если список пуст, даем базовый скилл (Solar Flare)
     if (save.equipped_skills.empty()) {
+        // Если ничего не выбрано — даем базовую вспышку
         if (skillDb.count("skill_solar_flare")) {
             m_player.addSkill(skillDb.at("skill_solar_flare"));
         }
@@ -78,6 +84,9 @@ int RunManager::getTotalSparks() const {
     return SaveManager::getInstance().getData().solis_sparks;
 }
 
+/**
+ * @brief Разблокирует новую запись лора в архиве игрока.
+ */
 void RunManager::unlockLore(const std::string& id) {
     if (!isLoreUnlocked(id)) {
         m_unlockedLore.push_back(id);
@@ -90,9 +99,11 @@ bool RunManager::isLoreUnlocked(const std::string& id) const {
     return std::find(m_unlockedLore.begin(), m_unlockedLore.end(), id) != m_unlockedLore.end();
 }
 
+/**
+ * @brief Увеличивает уровень эмпатии игрока (постоянная характеристика).
+ */
 void RunManager::addEmpathy(int amount) {
     m_player.addEmpathy(amount);
-    // Сразу фиксируем в глобальном сохранении
     SaveManager::getInstance().getData().empathy_level = m_player.getEmpathy();
     SaveManager::getInstance().save();
 }
@@ -129,31 +140,56 @@ void RunManager::incrementMercyCounter() {
     SaveManager::getInstance().save();
 }
 
+/**
+ * @brief Переход на следующий биом (уровень).
+ */
 void RunManager::advanceLevel() {
     m_currentLevel++;
     m_currentRoomIndex = 0;
 }
 
+/**
+ * @brief Генерирует варианты комнат для следующего шага игрока.
+ * После 12-й комнаты гарантированно выдает босса.
+ */
 std::vector<Room> RunManager::getNextRoomOptions() {
-    // Если игрок прошел достаточно комнат (например, 5 для MVP 5), генерируем босса
-    if (m_currentRoomIndex >= 5) {
+    // Проверка порога для появления босса уровня
+    if (m_currentRoomIndex >= 12) {
         Room bossRoom;
         bossRoom.id = "room_boss_" + std::to_string(m_currentLevel);
         bossRoom.level = m_currentLevel;
         bossRoom.type = "boss";
-        bossRoom.preview_text = "Огромные Врата (БОСС)";
-        bossRoom.description = "За этими вратами скрывается страж этого сектора. Пути назад нет.";
         
-        // Назначаем босса в зависимости от уровня
-        if (m_currentLevel == 1) bossRoom.possible_enemies = {"boss_libert"};
-        else if (m_currentLevel == 2) bossRoom.possible_enemies = {"boss_divit"};
-        else if (m_currentLevel == 3) bossRoom.possible_enemies = {"boss_mutat"};
-        else if (m_currentLevel == 4) bossRoom.possible_enemies = {"boss_vindict"};
-        else bossRoom.possible_enemies = {"boss_vindict"}; // Фолбэк
+        // Определение босса и атмосферного описания для каждого биома
+        if (m_currentLevel == 1) {
+            bossRoom.possible_enemies = {"boss_libert"};
+            bossRoom.preview_text = "Укрепленные врата карцера, из-за двери слышен лязг офицерской стали";
+            bossRoom.description = "Просторный зал управления тюрьмой. Выходы заблокированы тяжелыми решетками. Генерал Либерт лично преграждает вам путь к свободе. Весы должны снова выровняться...";
+        }
+        else if (m_currentLevel == 2) {
+            bossRoom.possible_enemies = {"boss_divit"};
+            bossRoom.preview_text = "Позолоченные двери лифта, cлышен звон монет и прерывистое дыхание";
+            bossRoom.description = "Роскошный кабинет на верхнем ярусе мануфактуры. Владелец заводов, барон Дивит, нервно сжимает свое оружие, прячась за роскошью, облитой чужой кровью. Казна должна снова идти на благо людей...";
+        }
+        else if (m_currentLevel == 3) {
+            bossRoom.possible_enemies = {"boss_mutat"};
+            bossRoom.preview_text = "Герметичный шлюз, из него сочится ослепительный белый свет и резкий запах химикатов";
+            bossRoom.description = "Главная операционная лабораторий. В центре зала возвышается доктор Мутат. Его глаза безумно блестят в предвкушении идеального образца для самого грандиозного эксперимента. Алхимия должна создавать а не уничтожать...";
+        }
+        else if (m_currentLevel == 4) {
+            bossRoom.possible_enemies = {"boss_vindict"};
+            bossRoom.preview_text = "Раскаленные врата Ядра, ваше тело разрывается от оглушительного рева пламени и невыносимого жара";
+            bossRoom.description = "Самое сердце великой Печи. Лорд Виндикт стоит в центре ядра, в его глазах горит безумное пламя которое не потушить вашей кровью. Солис должен снова загореться...";
+        }
+        else {
+            bossRoom.possible_enemies = {"boss_vindict"};
+            bossRoom.description = "За этими вратами скрывается страж этого сектора. Пути назад нет.";
+        }
         
         return { bossRoom };
     }
 
+    // Случайная выборка обычных комнат текущего уровня
     const auto& allRooms = DataManager::getInstance().getRooms();
     std::vector<Room> availableRooms;
 

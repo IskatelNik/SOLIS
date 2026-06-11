@@ -11,10 +11,17 @@
 
 namespace solis {
 
+/**
+ * @brief Конструктор состояния боя.
+ * @param enemy Умный указатель на противника (обычный или босс).
+ */
 CombatState::CombatState(sf::RenderWindow& window, StateMachine& stateMachine, std::unique_ptr<Enemy> enemy)
     : m_window(window), m_stateMachine(stateMachine), m_enemy(std::move(enemy)), 
       m_player(RunManager::getInstance().getPlayer()) {}
 
+/**
+ * @brief Инициализация интерфейса боя и начальных параметров.
+ */
 void CombatState::init() {
     sf::Vector2u windowSize = m_window.getSize();
     float w = static_cast<float>(windowSize.x);
@@ -22,7 +29,7 @@ void CombatState::init() {
 
     const sf::Font& font = ResourceManager::getInstance().getFont("main");
 
-    // Layout from Constants
+    // Инициализация UI-панелей (верхняя панель, лог, экран врага, меню действий, статус игрока)
     m_topBar = std::make_unique<UIBox>(sf::Vector2f(0,0), sf::Vector2f(w, h * constants::UI_TOPBAR_HEIGHT), constants::COLOR_UI_BG_LIGHT, constants::COLOR_UI_OUTLINE, -2.f);
     m_logDisplay = std::make_unique<UIBox>(sf::Vector2f(0, h * constants::UI_TOPBAR_HEIGHT), sf::Vector2f(w * 0.7f, h * constants::UI_MAIN_DISPLAY_HEIGHT), sf::Color::Black, constants::COLOR_UI_OUTLINE, -2.f);
     m_enemyDisplay = std::make_unique<UIBox>(sf::Vector2f(w * 0.7f, h * constants::UI_TOPBAR_HEIGHT), sf::Vector2f(w * 0.3f, h * constants::UI_MAIN_DISPLAY_HEIGHT), constants::COLOR_UI_BG_DARK, constants::COLOR_UI_OUTLINE, -2.f);
@@ -33,12 +40,13 @@ void CombatState::init() {
     logMessage(m_enemy->getIntroText());
     m_keyHeld = true; 
 
-    // Level 2 Biome Modifier: Enemy gets +0.2 defense
+    // Модификатор Мануфактур: враги имеют повышенную защиту
     if (RunManager::getInstance().getCurrentLevel() == 2) {
         m_enemy->setDefenseModifier(m_enemy->getDefenseModifier() + 0.2f);
         logMessage("ВЛИЯНИЕ УРОВНЯ: Враг укреплен (+0.2 DEF)");
     }
 
+    // Проверка критического состояния перед началом боя
     if (m_player.getHeat() >= constants::HEAT_MAX) {
         logMessage("КРИТИЧЕСКИЙ ПЕРЕГРЕВ! Вы сгораете заживо...");
         m_player.takeDamage(999);
@@ -48,6 +56,9 @@ void CombatState::init() {
     updateUI();
 }
 
+/**
+ * @brief Добавляет сообщение в боевой лог с автоматической прокруткой.
+ */
 void CombatState::logMessage(const std::string& msg) {
     m_logs.push_back(msg);
     if (m_logs.size() > 15) m_logs.pop_front();
@@ -59,22 +70,29 @@ void CombatState::logMessage(const std::string& msg) {
     m_logDisplay->setText(sf::String::fromUtf8(fullLog.begin(), fullLog.end()), font, 18, sf::Color::White);
 }
 
+/**
+ * @brief Обновляет текстовое содержимое всех UI-панелей.
+ */
 void CombatState::updateUI() {
     const sf::Font& font = ResourceManager::getInstance().getFont("main");
     
-    std::string locInfo = "В БОЮ | Сектор: ЗАГЛУШКА | Уровень: " + std::to_string(RunManager::getInstance().getCurrentLevel());
+    // Верхняя панель с названием локации
+    int lvl = RunManager::getInstance().getCurrentLevel();
+    std::string locName = (lvl == 1) ? "Тюрьма" : (lvl == 2) ? "Мануфактуры" : (lvl == 3) ? "Лаборатории" : "Печь";
+    std::string locInfo = "В БОЮ | ЛОКАЦИЯ: " + locName;
     m_topBar->setText(sf::String::fromUtf8(locInfo.begin(), locInfo.end()), font, 24, sf::Color::White);
 
+    // Статус игрока (HP, Жар, Эмпатия)
     std::stringstream pss;
     pss << "HP: " << m_player.getCurrentHp() << "/" << m_player.getMaxHp() << "\n";
     pss << "HEAT: " << (int)m_player.getHeat() << "%";
     pss << "\nEMP: " << m_player.getEmpathy();
-    std::string pStr = pss.str();
-    m_playerStatus->setText(sf::String::fromUtf8(pStr.begin(), pStr.end()), font, 22, sf::Color::White);
+    m_playerStatus->setText(sf::String::fromUtf8(pss.str().begin(), pss.str().end()), font, 22, sf::Color::White);
     
-    sf::Color heatColor = (m_player.getHeat() > constants::HEAT_OVERLOAD_THRESHOLD) ? constants::COLOR_HEAT_OVERLOAD : constants::COLOR_HEAT_NORMAL;
+    sf::Color heatColor = (m_player.getHeat() > m_player.getOverloadThreshold()) ? constants::COLOR_HEAT_OVERLOAD : constants::COLOR_HEAT_NORMAL;
     m_playerStatus->setProgressBar(m_player.getHeat() / constants::HEAT_MAX, heatColor);
 
+    // Инфо о противнике
     std::stringstream ess;
     ess << m_enemy->getName() << "\n\n";
     ess << "HP: " << m_enemy->getCurrentHp() << "/" << m_enemy->getMaxHp() << "\n";
@@ -82,18 +100,18 @@ void CombatState::updateUI() {
     
     if (m_enemy->isBoss()) {
         auto boss = static_cast<BossEnemy*>(m_enemy.get());
-        ess << "WILLPOWER: " << boss->getCurrentWillpower() << "/" << boss->getMaxHp() << "\n"; // Just willpower info
+        ess << "WILLPOWER: " << boss->getCurrentWillpower() << "/" << boss->getMaxHp() << "\n";
     }
 
+    // Отображение черты врага при достаточном уровне эмпатии
     std::string traitName = "???";
     if (m_player.getEmpathy() >= m_enemy->getEmpathyRevealThreshold()) {
         traitName = m_enemy->getTraitNameHidden();
     }
     ess << "Trait: " << traitName;
+    m_enemyDisplay->setText(sf::String::fromUtf8(ess.str().begin(), ess.str().end()), font, 20, sf::Color::White);
 
-    std::string enemyStr = ess.str();
-    m_enemyDisplay->setText(sf::String::fromUtf8(enemyStr.begin(), enemyStr.end()), font, 20, sf::Color::White);
-
+    // Логика меню действий
     std::string menuText;
     if (m_isCombatOver) {
         menuText = "[Space] Продолжить...";
@@ -111,18 +129,9 @@ void CombatState::updateUI() {
         }
         menuText += "[0] Назад";
     } else if (m_currentMenu == CombatMenu::ConfirmSkill) {
-        const auto& skills = m_player.getActiveSkills();
-        const auto& skill = skills[m_selectedSkillIndex];
-
-        float heatMultiplier = 1.0f + (m_player.getHeat() / constants::HEAT_MAX);
-        int estDmg = (int)((skill.base_damage + m_player.getBaseDamageBonus()) * heatMultiplier * m_enemy->getDefenseModifier());
+        const auto& skill = m_player.getActiveSkills()[m_selectedSkillIndex];
         float finalHeatCost = m_player.calculateHeatGain(skill.heat_cost_added);
-
-        // MVP 5 Biome 3 Update: -40% damage, -70% heat cost
-        if (RunManager::getInstance().getCurrentLevel() == 3) {
-            estDmg = (int)(estDmg * 0.6f);
-            finalHeatCost *= 0.3f;
-        }
+        if (RunManager::getInstance().getCurrentLevel() == 3) finalHeatCost *= 0.3f;
 
         menuText = skill.name + "\n" + skill.description + "\n";
         menuText += "+ ЖАР: " + std::to_string((int)finalHeatCost) + "%\n";
@@ -139,6 +148,9 @@ void CombatState::updateUI() {
     m_actionMenu->setText(sf::String::fromUtf8(menuText.begin(), menuText.end()), font, 22, sf::Color::Green);
 }
 
+/**
+ * @brief Обработка нажатий клавиш в бою.
+ */
 void CombatState::handleInput() {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) m_window.close();
 
@@ -163,7 +175,7 @@ void CombatState::handleInput() {
 
     if (!m_playerTurn) return;
 
-    // Уровень 4 Biome Modifier: +10 Heat at start of player turn
+    // Модификатор Печи (Уровень 4): Накопление жара каждый ход
     static bool level4HeatApplied = false;
     if (RunManager::getInstance().getCurrentLevel() == 4 && !level4HeatApplied) {
         m_player.addHeat(10.0f);
@@ -176,7 +188,7 @@ void CombatState::handleInput() {
         else if (num == 2) m_currentMenu = CombatMenu::Manipulation;
         else if (num == 3) {
             if (m_enemy->isBoss() && static_cast<BossEnemy*>(m_enemy.get())->getAggressionTurns() > 0) {
-                // Blocked
+                // Договор заблокирован на время агрессии босса
             } else {
                 m_dialogueOptions = DialogueGenerator::generateOptions(m_enemy->getTrait(), RunManager::getInstance().getCurrentLevel());
                 m_currentMenu = CombatMenu::Negotiate;
@@ -194,13 +206,13 @@ void CombatState::handleInput() {
     } else if (m_currentMenu == CombatMenu::ConfirmSkill) {
         if (num == 1) {
             const auto& skill = m_player.getActiveSkills()[m_selectedSkillIndex];
+            
+            // Расчет итогового урона и стоимости в Жаре
             float heatMultiplier = 1.0f + (m_player.getHeat() / constants::HEAT_MAX);
             int dmg = (int)((skill.base_damage + m_player.getBaseDamageBonus()) * heatMultiplier * m_enemy->getDefenseModifier());
-            
-            // MVP 5: Артефакты влияют на получение Жара
             float finalHeatCost = m_player.calculateHeatGain(skill.heat_cost_added);
             
-            // MVP 5 Biome 3 Update: -40% damage, -70% heat cost
+            // Модификатор Лабораторий (Уровень 3): Тьма поглощает часть энергии
             if (RunManager::getInstance().getCurrentLevel() == 3) {
                 dmg = (int)(dmg * 0.6f);
                 finalHeatCost *= 0.3f;
@@ -210,7 +222,7 @@ void CombatState::handleInput() {
             m_enemy->takeDamage(dmg);
             m_player.addHeat(finalHeatCost);
             
-            // Накладываем эффекты
+            // Применение статусных эффектов навыка
             for (const auto& eff : skill.effects) {
                 if (eff.target == "enemy") {
                     m_enemy->addStatusEffect({eff.type, eff.value, eff.duration_turns});
@@ -235,6 +247,7 @@ void CombatState::handleInput() {
             m_currentMenu = CombatMenu::Attack;
         }
     } else if (m_currentMenu == CombatMenu::Negotiate) {
+        // Логика социальной победы (убеждение)
         if (num == 0) m_currentMenu = CombatMenu::Main;
         else if (num > 0 && (size_t)num <= m_dialogueOptions.size()) {
             const auto& opt = m_dialogueOptions[num - 1];
@@ -246,60 +259,46 @@ void CombatState::handleInput() {
                 if (opt.isCorrect) {
                     logMessage(phase.success_reply);
                     RunManager::getInstance().addEmpathy(constants::EMPATHY_REWARD_CORRECT);
-                    
                     boss->reduceWillpower();
-                    m_player.reduceHeat(20.0f); // TDD: Жар снижается
+                    m_player.reduceHeat(20.0f);
                     
                     if (boss->getCurrentWillpower() <= 0) {
                         m_isSocialVictory = true;
-                        m_isCombatOver = true;
                     } else {
-                        // Boss transitions to next phase, print new replica
                         logMessage("--- ФАЗА ИЗМЕНЕНА ---");
                         logMessage(boss->getCurrentPhase().boss_replica); 
-                        
-                        // Используем длительность агрессии из НОВОЙ (текущей) фазы
                         boss->setAggressionTurns(boss->getCurrentPhase().aggression_turns);
-                        m_justNegotiated = true; // Запрещаем списывать 1 ход агрессии прямо сейчас
-                        
                         m_playerTurn = false;
-                        level4HeatApplied = false;
                         m_currentMenu = CombatMenu::Main;
                     }
                 } else {
                     logMessage(phase.fail_reply);
                     m_enemy->setDamageModifier(m_enemy->getDamageModifier() + 0.3f);
                     RunManager::getInstance().addEmpathy(constants::EMPATHY_REWARD_WRONG);
-                    
                     m_playerTurn = false;
-                    level4HeatApplied = false;
                     m_currentMenu = CombatMenu::Main;
                 }
             } else {
-                // Обычный враг
                 if (opt.isCorrect) {
                     logMessage("Вы подобрали верные слова! Враг опускает оружие.");
                     RunManager::getInstance().addEmpathy(constants::EMPATHY_REWARD_CORRECT);
                     m_isSocialVictory = true;
-                    m_isCombatOver = true;
                 } else if (opt.isNeutral) {
                     logMessage("Ваши слова не трогают врага. Он игнорирует вас.");
                     RunManager::getInstance().addEmpathy(constants::EMPATHY_REWARD_NEUTRAL);
                     m_playerTurn = false;
-                    level4HeatApplied = false;
                     m_currentMenu = CombatMenu::Main;
                 } else {
                     logMessage("Ваши слова ввергают врага в ярость!");
                     m_enemy->setDamageModifier(m_enemy->getDamageModifier() + 0.3f);
                     RunManager::getInstance().addEmpathy(constants::EMPATHY_REWARD_WRONG);
-                    
                     m_playerTurn = false;
-                    level4HeatApplied = false;
                     m_currentMenu = CombatMenu::Main;
                 }
             }
         }
     } else if (m_currentMenu == CombatMenu::Manipulation) {
+        // Логика прямой передачи/забора Жара
         if (num == 0) m_currentMenu = CombatMenu::Main;
         else if (num == 1) { // Take
             if (m_enemy->isDrainable()) {
@@ -328,6 +327,7 @@ void CombatState::handleInput() {
         }
     }
 
+    // Если ход перешел к врагу
     if (!m_playerTurn && !m_isCombatOver) {
         enemyTurn();
         processTurnEnd();
@@ -337,8 +337,10 @@ void CombatState::handleInput() {
     updateUI();
 }
 
+/**
+ * @brief Обработка завершения хода (DoT-эффекты и кулдауны).
+ */
 void CombatState::processTurnEnd() {
-    // Player DoT
     for (const auto& eff : m_player.getStatusEffects()) {
         if (eff.type == "damage_over_time") {
             m_player.takeDamage((int)eff.value);
@@ -346,7 +348,6 @@ void CombatState::processTurnEnd() {
         }
     }
 
-    // Enemy DoT
     for (const auto& eff : m_enemy->getStatusEffects()) {
         if (eff.type == "damage_over_time") {
             m_enemy->takeDamage((int)eff.value);
@@ -364,6 +365,9 @@ void CombatState::processTurnEnd() {
     m_playerTurn = true;
 }
 
+/**
+ * @brief Ход противника: расчет и нанесение урона игроку.
+ */
 void CombatState::enemyTurn() {
     float dmgMult = 1.0f;
     for (const auto& eff : m_enemy->getStatusEffects()) {
@@ -380,6 +384,7 @@ void CombatState::enemyTurn() {
     m_player.takeDamage(dmg);
     logMessage(m_enemy->getName() + " атакует! Урон: " + std::to_string(dmg));
 
+    // Проверка получения урона от Перегрузки
     float overloadThreshold = m_player.getOverloadThreshold();
     for (const auto& eff : m_player.getStatusEffects()) {
         if (eff.type == "buff_overload_threshold") overloadThreshold += eff.value;
@@ -392,54 +397,43 @@ void CombatState::enemyTurn() {
     }
 }
 
+/**
+ * @brief Проверка условий завершения боя (победа/поражение).
+ */
 void CombatState::checkEndCombat() {
     if (m_enemy->getCurrentHp() <= 0) {
         logMessage("ПОБЕДА! Враг повержен. +10 Искр.");
         RunManager::getInstance().addSparks(10);
         RunManager::getInstance().incrementBloodCounter();
-        if (m_enemy->isBoss()) {
-            RunManager::getInstance().modifyIdeologyScore(-1);
-        }
+        if (m_enemy->isBoss()) RunManager::getInstance().modifyIdeologyScore(-1);
         m_isCombatOver = true;
     } else if (m_isSocialVictory) {
         RunManager::getInstance().incrementMercyCounter();
-        if (m_enemy->isBoss()) {
-            RunManager::getInstance().modifyIdeologyScore(1);
-        }
+        if (m_enemy->isBoss()) RunManager::getInstance().modifyIdeologyScore(1);
         
         int currentLvl = RunManager::getInstance().getCurrentLevel();
+        // Особая награда/штраф для 3-го уровня
         if (currentLvl == 3) {
-            // MVP 5 Biome 3 Update: 35% chance to lose artifact instead of gaining one
             static std::random_device rd;
             static std::mt19937 gen(rd());
             std::uniform_int_distribution<> dis(1, 100);
-            int roll = dis(gen);
-            
-            if (roll <= 35) {
+            if (dis(gen) <= 35) {
                 std::string lostArt = m_player.removeRandomArtifact();
-                if (!lostArt.empty()) {
-                    logMessage("ВЛИЯНИЕ УРОВНЯ: Тьма поглотила ваш артефакт (" + lostArt + ")!");
-                } else {
-                    logMessage("ВЛИЯНИЕ УРОВНЯ: Тьма тянется к вам, но забирать нечего.");
-                }
-            } else {
-                logMessage("ВЛИЯНИЕ УРОВНЯ: Тьма безмолвствует. Вы ничего не получили.");
+                if (!lostArt.empty()) logMessage("ВЛИЯНИЕ УРОВНЯ: Тьма поглотила ваш артефакт (" + lostArt + ")!");
             }
         } else {
-            // Выдача артефакта за мирное разрешение (Стандарт для уровней 1, 2, 4)
+            // Выдача случайного артефакта за милосердие
             const auto& artifacts = DataManager::getInstance().getArtifacts();
             if (!artifacts.empty()) {
                 static std::random_device rd;
                 static std::mt19937 gen(rd());
                 std::uniform_int_distribution<> dis(0, static_cast<int>(artifacts.size()) - 1);
-                
                 auto it = artifacts.begin();
                 std::advance(it, dis(gen));
                 m_player.addArtifact(it->second);
                 logMessage("Милость вознаграждена! Получен артефакт: " + it->second.name);
             }
         }
-
         m_isCombatOver = true;
     } else if (m_player.getCurrentHp() <= 0) {
         logMessage("ПОРАЖЕНИЕ... Ваша искра угасла.");
@@ -447,11 +441,12 @@ void CombatState::checkEndCombat() {
     }
 }
 
+/**
+ * @brief Переход к следующему состоянию после окончания боя.
+ */
 void CombatState::endCombat(bool victory) {
     if (victory) {
-        if (m_isSocialVictory) {
-            RunManager::getInstance().addSparks(5);
-        }
+        if (m_isSocialVictory) RunManager::getInstance().addSparks(5);
         
         if (m_enemy->isBoss()) {
             if (RunManager::getInstance().getCurrentLevel() >= 4) {
@@ -464,6 +459,7 @@ void CombatState::endCombat(bool victory) {
             m_stateMachine.popState();
         }
     } else {
+        // Возврат в Хаб при поражении
         m_stateMachine.clearAndSetState(std::make_unique<HubState>(m_window, m_stateMachine));
     }
 }

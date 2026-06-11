@@ -5,24 +5,27 @@
 
 namespace solis {
 
+/**
+ * @brief Генерирует 3-4 варианта ответа для социальной фазы боя.
+ * Логика учитывает текущий уровень (биома) и наличие открытого лора.
+ */
 std::vector<DialogueGenerator::DialogueOption> DialogueGenerator::generateOptions(Trait enemyTrait, int currentLevel) {
     int target = static_cast<int>(enemyTrait);
     const auto& unlocked = RunManager::getInstance().getUnlockedLore();
     
     std::vector<DialogueOption> options;
 
-    // 1. Попытка получить верный ответ (i)
+    // 1. Формирование ПРАВИЛЬНОГО ответа
     LoreItem correctLore = getBestLoreForTrait(target, currentLevel, unlocked);
-    // Если лор не открыт (вернулась заглушка с target_trait == -1), это НЕ считается верным ответом
+    // Если игрок еще не нашел нужный лор, вернется заглушка, которая не считается верной
     bool isActuallyCorrect = (correctLore.target_trait == target);
     options.push_back({correctLore.dialogue_option_text, target, isActuallyCorrect, false});
 
     static std::random_device rd;
     static std::mt19937 gen(rd());
 
-    // MVP 5: Biome Modifiers (Level 2 disables neutral answers entirely)
+    // 2. Модификатор Мануфактур (Уровень 2): Исключаем нейтральные ответы (повышенная сложность)
     if (currentLevel == 2) {
-        // На 2 уровне нет нейтральных ответов, генерируем 3 неверных
         std::vector<int> others;
         for(int i=0; i<8; ++i) {
             if(i != target) others.push_back(i);
@@ -35,7 +38,7 @@ std::vector<DialogueGenerator::DialogueOption> DialogueGenerator::generateOption
             options.push_back({wrongLore.dialogue_option_text, wrongTrait, false, false});
         }
     } else {
-        // Стандартная генерация: 1 нейтральный, 2 неверных
+        // 3. Стандартная генерация: 1 нейтральный вариант и 2 заведомо неверных
         int n1 = (target - 1 + 8) % 8;
         int n2 = (target + 1) % 8;
         
@@ -47,7 +50,6 @@ std::vector<DialogueGenerator::DialogueOption> DialogueGenerator::generateOption
 
         std::vector<int> others;
         for(int i=0; i<8; ++i) {
-            // Исключаем целевую черту и обе нейтральные (чтобы случайно не выдать вторую нейтральную как неверную)
             if(i != target && i != n1 && i != n2) others.push_back(i);
         }
         std::shuffle(others.begin(), others.end(), gen);
@@ -59,16 +61,19 @@ std::vector<DialogueGenerator::DialogueOption> DialogueGenerator::generateOption
         }
     }
 
-    // 4. Перемешиваем
+    // Перемешивание вариантов, чтобы правильный ответ не всегда был первым
     std::shuffle(options.begin(), options.end(), gen);
 
     return options;
 }
 
+/**
+ * @brief Ищет наиболее подходящую реплику для конкретной черты на текущем уровне.
+ * Если лор не открыт — возвращает заглушку текущего биома.
+ */
 LoreItem DialogueGenerator::getBestLoreForTrait(int traitIndex, int currentLevel, const std::vector<std::string>& unlockedIds) {
     const auto& allLore = DataManager::getInstance().getLore();
     
-    // Ищем в разблокированном лоре для этой черты ТОЛЬКО для текущего уровня
     for (const auto& id : unlockedIds) {
         if (allLore.find(id) != allLore.end()) {
             const auto& lore = allLore.at(id);
@@ -78,16 +83,17 @@ LoreItem DialogueGenerator::getBestLoreForTrait(int traitIndex, int currentLevel
         }
     }
     
-    // Если лор не найден или не разблокирован — возвращаем общую заглушку для этого уровня
     return getPlaceholder(currentLevel);
 }
 
+/**
+ * @brief Возвращает "неизвестную" реплику (???) для текущего уровня.
+ */
 LoreItem DialogueGenerator::getPlaceholder(int currentLevel) {
     const auto& allLore = DataManager::getInstance().getLore();
     for (auto const& [id, lore] : allLore) {
         if (lore.target_trait == -1 && lore.level == currentLevel) return lore;
     }
-    // Фолбэк на случай отсутствия заглушки нужного уровня
     return {"placeholder", currentLevel, -1, "...", "???"};
 }
 

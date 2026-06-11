@@ -1,9 +1,11 @@
 #include "States/MainMenuState.h"
 #include "Core/ResourceManager.h"
-#include <iostream>
 
 namespace solis {
 
+/**
+ * @brief Начальное состояние главного меню (используется как точка входа или отладка).
+ */
 MainMenuState::MainMenuState(sf::RenderWindow& window, StateMachine& stateMachine)
     : m_window(window), m_stateMachine(stateMachine) {}
 
@@ -14,50 +16,24 @@ void MainMenuState::init() {
 
     const sf::Font& font = ResourceManager::getInstance().getFont("main");
 
-    // TopBar: 10% высоты
-    m_topBar = std::make_unique<UIBox>(
-        sf::Vector2f(0.f, 0.f),
-        sf::Vector2f(w, h * 0.1f),
-        sf::Color(30, 30, 30),
-        sf::Color::White,
-        -2.f
-    );
-    
-    std::string topBarText = "SOLIS: MVP 0 | HP: 100/100 | HEAT: 0%";
-    m_topBar->setText(sf::String::fromUtf8(topBarText.begin(), topBarText.end()), font, 24, sf::Color::Yellow);
+    // Инициализация базового макета UI
+    m_topBar = std::make_unique<UIBox>(sf::Vector2f(0.f, 0.f), sf::Vector2f(w, h * 0.1f), sf::Color(30, 30, 30), sf::Color::White, -2.f);
+    m_topBar->setText("SOLIS", font, 24, sf::Color::Yellow);
 
-    // MainDisplay: 55% высоты
-    m_mainDisplay = std::make_unique<UIBox>(
-        sf::Vector2f(0.f, h * 0.1f),
-        sf::Vector2f(w, h * 0.55f),
-        sf::Color::Black,
-        sf::Color::White,
-        -2.f
-    );
-    std::string testText = "TESTING WORD WRAP SYSTEM: This is a very long string that should be automatically wrapped by the UIBox component. If the logic works correctly, the text will not overflow the boundaries of this box and instead will continue on the next line. SOLIS uses a modular UI architecture for maximum flexibility.";
-    m_mainDisplay->setText(sf::String::fromUtf8(testText.begin(), testText.end()), font, 20, sf::Color::White);
+    m_mainDisplay = std::make_unique<UIBox>(sf::Vector2f(0.f, h * 0.1f), sf::Vector2f(w, h * 0.55f), sf::Color::Black, sf::Color::White, -2.f);
+    m_mainDisplay->setText("Главное Меню - Нажмите [1] для входа в Хаб", font, 20, sf::Color::White);
 
-    // ActionMenu: 35% высоты
-    m_actionMenu = std::make_unique<UIBox>(
-        sf::Vector2f(0.f, h * 0.65f),
-        sf::Vector2f(w, h * 0.35f),
-        sf::Color(20, 20, 20),
-        sf::Color::White,
-        -2.f
-    );
-    std::string actionText = "[1] Начать игру (Not active)\n[2] Выход (Esc)";
-    m_actionMenu->setText(sf::String::fromUtf8(actionText.begin(), actionText.end()), font, 24, sf::Color::Green);
+    m_actionMenu = std::make_unique<UIBox>(sf::Vector2f(0.f, h * 0.65f), sf::Vector2f(w, h * 0.35f), sf::Color(20, 20, 20), sf::Color::White, -2.f);
+    m_actionMenu->setText("[1] Войти в игру\n[Esc] Выход", font, 24, sf::Color::Green);
 }
 
 void MainMenuState::handleInput() {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) {
-        m_window.close();
-    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) m_window.close();
+    
+    // В текущей версии игра сразу стартует в HubState, MainMenu оставлен для структуры
 }
 
-void MainMenuState::update(float deltaTime) {
-    // В MVP 0 логика обновления минимальна
-}
+void MainMenuState::update(float deltaTime) {}
 
 void MainMenuState::render(sf::RenderWindow& window) {
     if (m_topBar) m_topBar->render(window);

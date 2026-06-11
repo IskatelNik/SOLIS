@@ -6,29 +6,47 @@ namespace solis {
 
 Player::Player() {}
 
+/**
+ * @brief Наносит урон игроку, уменьшая текущее HP.
+ */
 void Player::takeDamage(int damage) {
     m_currentHp -= damage;
     if (m_currentHp < 0) m_currentHp = 0;
 }
 
+/**
+ * @brief Восстанавливает здоровье игрока, не превышая максимум.
+ */
 void Player::heal(int amount) {
     m_currentHp += amount;
     if (m_currentHp > m_maxHp) m_currentHp = m_maxHp;
 }
 
+/**
+ * @brief Увеличивает текущий уровень Жара.
+ */
 void Player::addHeat(float amount) {
     m_heat += amount;
 }
 
+/**
+ * @brief Снижает текущий уровень Жара.
+ */
 void Player::reduceHeat(float amount) {
     m_heat -= amount;
     if (m_heat < 0) m_heat = 0.0f;
 }
 
+/**
+ * @brief Рассчитывает итоговое накопление Жара с учетом всех множителей (улучшения + артефакты).
+ */
 float Player::calculateHeatGain(float baseAmount) const {
     return baseAmount * getHeatGainMultiplier();
 }
 
+/**
+ * @brief Возвращает текущий порог перегрузки (базовый + бонусы от артефактов).
+ */
 float Player::getOverloadThreshold() const {
     float threshold = m_baseOverloadThreshold;
     for (const auto& art : m_artifacts) {
@@ -37,6 +55,9 @@ float Player::getOverloadThreshold() const {
     return threshold;
 }
 
+/**
+ * @brief Возвращает суммарный бонус к базовому урону от всех источников.
+ */
 int Player::getBaseDamageBonus() const {
     int bonus = m_baseDamageBonus;
     for (const auto& art : m_artifacts) {
@@ -45,6 +66,9 @@ int Player::getBaseDamageBonus() const {
     return bonus;
 }
 
+/**
+ * @brief Возвращает итоговый множитель накопления Жара.
+ */
 float Player::getHeatGainMultiplier() const {
     float mult = m_baseHeatGainMultiplier;
     for (const auto& art : m_artifacts) {
@@ -53,6 +77,9 @@ float Player::getHeatGainMultiplier() const {
     return mult;
 }
 
+/**
+ * @brief Возвращает итоговый множитель защиты (получаемого урона).
+ */
 float Player::getDefenseMultiplier() const {
     float mult = 1.0f;
     for (const auto& art : m_artifacts) {
@@ -61,6 +88,9 @@ float Player::getDefenseMultiplier() const {
     return mult;
 }
 
+/**
+ * @brief Обновляет длительность активных статусных эффектов (баффы/дебаффы).
+ */
 void Player::processTurnEffects() {
     for (auto it = m_activeEffects.begin(); it != m_activeEffects.end();) {
         it->duration_turns--;
@@ -72,6 +102,10 @@ void Player::processTurnEffects() {
     }
 }
 
+/**
+ * @brief Случайным образом удаляет один артефакт из инвентаря (механика Тьмы на 3-м уровне).
+ * @return Название удаленного артефакта.
+ */
 std::string Player::removeRandomArtifact() {
     if (m_artifacts.empty()) return "";
     
@@ -82,7 +116,7 @@ std::string Player::removeRandomArtifact() {
     int index = dis(gen);
     Artifact art = m_artifacts[index];
     
-    // Reverse max_hp_flat logic
+    // Если артефакт давал бонус к макс. HP — корректируем текущие показатели
     if (art.modifier_type == "max_hp_flat") {
         m_maxHp -= static_cast<int>(art.value);
         if (m_currentHp > m_maxHp) m_currentHp = m_maxHp;
