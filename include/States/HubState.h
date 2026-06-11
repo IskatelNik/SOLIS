@@ -41,6 +41,7 @@ private:
 
     HubMenu m_currentMenu = HubMenu::Main;
     std::vector<std::string> m_shopUpgradeIds;
+    int m_shopPage = 0;
     bool m_keyHeld = false;
 };
 

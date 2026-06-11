@@ -135,21 +135,38 @@ void RunManager::advanceLevel() {
 }
 
 std::vector<Room> RunManager::getNextRoomOptions() {
-    // Если игрок прошел достаточно комнат (например, 5 для MVP 5), генерируем босса
-    if (m_currentRoomIndex >= 5) {
+    // Если игрок прошел достаточно комнат (например, 12 для полной версии), генерируем босса
+    if (m_currentRoomIndex >= 2) {
         Room bossRoom;
         bossRoom.id = "room_boss_" + std::to_string(m_currentLevel);
         bossRoom.level = m_currentLevel;
         bossRoom.type = "boss";
-        bossRoom.preview_text = "Огромные Врата (БОСС)";
-        bossRoom.description = "За этими вратами скрывается страж этого сектора. Пути назад нет.";
         
-        // Назначаем босса в зависимости от уровня
-        if (m_currentLevel == 1) bossRoom.possible_enemies = {"boss_libert"};
-        else if (m_currentLevel == 2) bossRoom.possible_enemies = {"boss_divit"};
-        else if (m_currentLevel == 3) bossRoom.possible_enemies = {"boss_mutat"};
-        else if (m_currentLevel == 4) bossRoom.possible_enemies = {"boss_vindict"};
-        else bossRoom.possible_enemies = {"boss_vindict"}; // Фолбэк
+        // Назначаем босса и уникальное описание в зависимости от уровня
+        if (m_currentLevel == 1) {
+            bossRoom.possible_enemies = {"boss_libert"};
+            bossRoom.preview_text = "Укрепленные врата карцера, из-за двери слышен лязг офицерской стали";
+            bossRoom.description = "Просторный зал управления тюрьмой. Выходы заблокированы тяжелыми решетками. Генерал Либерт лично преграждает вам путь к свободе. Весы должны снова выровняться...";
+        }
+        else if (m_currentLevel == 2) {
+            bossRoom.possible_enemies = {"boss_divit"};
+            bossRoom.preview_text = "Позолоченные двери лифта, cлышен звон монет и прерывистое дыхание";
+            bossRoom.description = "Роскошный кабинет на верхнем ярусе мануфактуры. Владелец заводов, барон Дивит, нервно сжимает свое оружие, прячась за роскошью, облитой чужой кровью. Казна должна снова идти на благо людей...";
+        }
+        else if (m_currentLevel == 3) {
+            bossRoom.possible_enemies = {"boss_mutat"};
+            bossRoom.preview_text = "Герметичный шлюз, из него сочится ослепительный белый свет и резкий запах химикатов";
+            bossRoom.description = "Главная операционная лабораторий. В центре зала возвышается доктор Мутат. Его глаза безумно блестят в предвкушении идеального образца для самого грандиозного эксперимента. Алхимия должна создавать а не уничтожать...";
+        }
+        else if (m_currentLevel == 4) {
+            bossRoom.possible_enemies = {"boss_vindict"};
+            bossRoom.preview_text = "Раскаленные врата Ядра, ваше тело разрывается от оглушительного рева пламени и невыносимого жара";
+            bossRoom.description = "Самое сердце великой Печи. Лорд Виндикт стоит в центре ядра, в его глазах горит безумное пламя которое не потушить вашей кровью. Солис должен снова загореться...";
+        }
+        else {
+            bossRoom.possible_enemies = {"boss_vindict"};
+            bossRoom.description = "За этими вратами скрывается страж этого сектора. Пути назад нет.";
+        }
         
         return { bossRoom };
     }

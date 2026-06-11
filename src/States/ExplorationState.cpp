@@ -56,8 +56,9 @@ void ExplorationState::generateNextStep() {
     std::string transitionText = "ПЕРЕД ВАМИ НОВЫЕ ПУТИ...\n\nТень отступает, открывая несколько проходов. Куда вы направитесь дальше?";
     m_mainDisplay->setText(sf::String::fromUtf8(transitionText.begin(), transitionText.end()), font, 24, sf::Color::Yellow);
 
-    std::string levelInfo = "УРОВЕНЬ: " + std::to_string(RunManager::getInstance().getCurrentLevel()) + 
-                            " | ШАГ: " + std::to_string(RunManager::getInstance().getCurrentRoomIndex());
+    int lvl = RunManager::getInstance().getCurrentLevel();
+    std::string locName = (lvl == 1) ? "Тюрьма" : (lvl == 2) ? "Мануфактуры" : (lvl == 3) ? "Лаборатории" : "Печь";
+    std::string levelInfo = "ЛОКАЦИЯ: " + locName + " | ШАГ: " + std::to_string(RunManager::getInstance().getCurrentRoomIndex());
     m_topBar->setText(sf::String::fromUtf8(levelInfo.begin(), levelInfo.end()), font, 24, sf::Color::Yellow);
 
     std::string menuText;

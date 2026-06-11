@@ -41,6 +41,11 @@ file(GLOB_RECURSE PROJECT_SOURCES
 
 add_executable(SOLIS ${PROJECT_SOURCES})
 
+# Скрываем консоль в Release билде, но оставляем в Debug
+if(WIN32)
+    set_target_properties(SOLIS PROPERTIES WIN32_EXECUTABLE "$<CONFIG:Release>")
+endif()
+
 if(MSVC)
     target_compile_options(SOLIS PRIVATE "/utf-8")
 endif()
@@ -49,10 +54,12 @@ endif()
 target_include_directories(SOLIS PRIVATE src include)
 
 # 5. Линкуем библиотеки (модули SFML и JSON)
+# Добавляем SFML::Main для корректной работы WIN32_EXECUTABLE (скрытие консоли)
 target_link_libraries(SOLIS PRIVATE 
     SFML::Graphics 
     SFML::Window 
     SFML::System 
+    SFML::Main
     nlohmann_json::nlohmann_json
 )
 

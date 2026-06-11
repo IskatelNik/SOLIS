@@ -62,7 +62,9 @@ void CombatState::logMessage(const std::string& msg) {
 void CombatState::updateUI() {
     const sf::Font& font = ResourceManager::getInstance().getFont("main");
     
-    std::string locInfo = "В БОЮ | Сектор: ЗАГЛУШКА | Уровень: " + std::to_string(RunManager::getInstance().getCurrentLevel());
+    int lvl = RunManager::getInstance().getCurrentLevel();
+    std::string locName = (lvl == 1) ? "Тюрьма" : (lvl == 2) ? "Мануфактуры" : (lvl == 3) ? "Лаборатории" : "Печь";
+    std::string locInfo = "В БОЮ | ЛОКАЦИЯ: " + locName;
     m_topBar->setText(sf::String::fromUtf8(locInfo.begin(), locInfo.end()), font, 24, sf::Color::White);
 
     std::stringstream pss;
