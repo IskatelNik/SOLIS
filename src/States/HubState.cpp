@@ -10,15 +10,9 @@
 
 namespace solis {
 
-/**
- * @brief Состояние "Родовой Очаг" (Хаб). Место между забегами для прокачки и выбора навыков.
- */
 HubState::HubState(sf::RenderWindow& window, StateMachine& stateMachine)
     : m_window(window), m_stateMachine(stateMachine) {}
 
-/**
- * @brief Инициализация интерфейса Хаба.
- */
 void HubState::init() {
     sf::Vector2u windowSize = m_window.getSize();
     float w = static_cast<float>(windowSize.x);
@@ -34,26 +28,22 @@ void HubState::init() {
     updateUI();
 }
 
-/**
- * @brief Перерисовывает текстовый контент Хаба в зависимости от выбранного подменю.
- */
 void HubState::updateUI() {
     const sf::Font& font = ResourceManager::getInstance().getFont("main");
     SaveData& save = SaveManager::getInstance().getData();
 
-    // Верхняя панель: валюта и эмпатия
+    // TopBar
     std::stringstream sparksSS;
     sparksSS << "РОДОВОЙ ОЧАГ | ИСКРЫ: " << save.solis_sparks;
-    m_topBar->setText(sf::String::fromUtf8(sparksSS.str().begin(), sparksSS.str().end()), font, 24, sf::Color::Yellow);
+    std::string sparksText = sparksSS.str();
+    m_topBar->setText(sf::String::fromUtf8(sparksText.begin(), sparksText.end()), font, 24, sf::Color::Yellow);
 
-    std::stringstream ss; // Основной текст
-    std::stringstream as; // Текст меню действий
+    std::stringstream ss;
+    std::stringstream as;
 
     if (m_currentMenu == HubMenu::Main) {
-        ss << "Одинокая искра разгорается в блеклой камере, Солис взывает к своему аватару... Что сделаешь ты на этот раз?\n\n";
+        ss << "Одинокая искра разгорается в блеклой камере, Солис взывает к своему аватару...Что сделаешь ты на этот раз?\n\n";
         ss << "ТЕКУЩИЙ СТАТУС:\n";
-        
-        // Расчет бонусного здоровья от пассивок
         int hpBonus = 0;
         const auto& upgradeDb = DataManager::getInstance().getUpgrades();
         for (const auto& uid : save.unlocked_upgrades) {
@@ -75,7 +65,6 @@ void HubState::updateUI() {
     else if (m_currentMenu == HubMenu::Shop) {
         ss << "МАГАЗИН УЛУЧШЕНИЙ\nТратьте Искры Солис, чтобы усилить свою оболочку.\n\n";
         
-        // Формирование списка доступных для покупки улучшений
         m_shopUpgradeIds.clear();
         const auto& allUpgrades = DataManager::getInstance().getUpgrades();
         for (auto const& [id, upg] : allUpgrades) {
@@ -87,7 +76,6 @@ void HubState::updateUI() {
         if (m_shopUpgradeIds.empty()) {
             ss << "Все доступные улучшения приобретены!";
         } else {
-            // Постраничный вывод (по 5 штук)
             size_t pageSize = 5;
             size_t start = m_shopPage * pageSize;
             size_t end = std::min(start + pageSize, m_shopUpgradeIds.size());
@@ -118,7 +106,6 @@ void HubState::updateUI() {
             }
         }
 
-        // Формирование списка разблокированных навыков
         ss << "\nДОСТУПНЫЕ НАВЫКИ:\n";
         std::vector<std::string> available;
         available.push_back("skill_solar_flare");
@@ -143,13 +130,12 @@ void HubState::updateUI() {
         as << "\n[0] Назад";
     }
 
-    m_mainDisplay->setText(sf::String::fromUtf8(ss.str().begin(), ss.str().end()), font, 22, sf::Color::White);
-    m_actionMenu->setText(sf::String::fromUtf8(as.str().begin(), as.str().end()), font, 20, sf::Color::Green);
+    std::string mainText = ss.str();
+    std::string actionText = as.str();
+    m_mainDisplay->setText(sf::String::fromUtf8(mainText.begin(), mainText.end()), font, 22, sf::Color::White);
+    m_actionMenu->setText(sf::String::fromUtf8(actionText.begin(), actionText.end()), font, 20, sf::Color::Green);
 }
 
-/**
- * @brief Обработка ввода для навигации по меню Хаба.
- */
 void HubState::handleInput() {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) {
         if (m_currentMenu == HubMenu::Main) m_window.close();
@@ -163,9 +149,12 @@ void HubState::handleInput() {
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num3)) { anyNum = true; num = 3; }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num4)) { anyNum = true; num = 4; }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num5)) { anyNum = true; num = 5; }
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num6)) { anyNum = true; num = 6; }
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num7)) { anyNum = true; num = 7; }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num8)) { anyNum = true; num = 8; }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num9)) { anyNum = true; num = 9; }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num0)) { anyNum = true; num = 0; }
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Enter)) { anyNum = true; num = 13; }
 
     if (!anyNum) { m_keyHeld = false; return; }
     if (m_keyHeld) return;
@@ -175,41 +164,52 @@ void HubState::handleInput() {
         if (num == 1) {
             RunManager::getInstance().startNewRun();
             m_stateMachine.changeState(std::make_unique<ExplorationState>(m_window, m_stateMachine));
-        } else if (num == 2) m_currentMenu = HubMenu::Shop;
-        else if (num == 3) m_currentMenu = HubMenu::Inventory;
+        } else if (num == 2) {
+            m_currentMenu = HubMenu::Shop;
+        } else if (num == 3) {
+            m_currentMenu = HubMenu::Inventory;
+        }
     } else if (m_currentMenu == HubMenu::Shop) {
         if (num == 0) m_currentMenu = HubMenu::Main;
-        else if (num == 8 && m_shopPage > 0) m_shopPage--;
-        else if (num == 9 && (m_shopPage + 1) * 5 < m_shopUpgradeIds.size()) m_shopPage++;
+        else if (num == 8) { // Prev Page
+            if (m_shopPage > 0) m_shopPage--;
+        }
+        else if (num == 9) { // Next Page
+            size_t pageSize = 5;
+            if ((m_shopPage + 1) * pageSize < m_shopUpgradeIds.size()) m_shopPage++;
+        }
         else if (num > 0 && num <= 5) {
-            size_t idx = m_shopPage * 5 + (num - 1);
-            if (idx < m_shopUpgradeIds.size()) buyUpgrade((int)idx);
+            size_t pageSize = 5;
+            size_t actualIndex = m_shopPage * pageSize + (num - 1);
+            if (actualIndex < m_shopUpgradeIds.size()) buyUpgrade((int)actualIndex);
         }
     } else if (m_currentMenu == HubMenu::Inventory) {
         if (num == 0) m_currentMenu = HubMenu::Main;
         else {
-             // Логика формирования того же списка available, что и в updateUI
              std::vector<std::string> available;
              available.push_back("skill_solar_flare");
              for (const auto& uid : SaveManager::getInstance().getData().unlocked_upgrades) {
                 if (DataManager::getInstance().getUpgrades().count(uid)) {
                     const auto& upg = DataManager::getInstance().getUpgrades().at(uid);
                     if (upg.type == "active_skill" && !upg.skill_ref.empty()) {
-                        if (std::find(available.begin(), available.end(), upg.skill_ref) == available.end()) available.push_back(upg.skill_ref);
+                        if (std::find(available.begin(), available.end(), upg.skill_ref) == available.end()) {
+                            available.push_back(upg.skill_ref);
+                        }
                     }
                 }
              }
-             if (num > 0 && (size_t)num <= available.size()) toggleSkill(available[num-1]);
+             if (num > 0 && (size_t)num <= available.size()) {
+                 toggleSkill(available[num-1]);
+             }
         }
     }
 
     updateUI();
 }
 
-/**
- * @brief Покупка улучшения.
- */
 void HubState::buyUpgrade(int index) {
+    if (index >= m_shopUpgradeIds.size()) return;
+    
     SaveData& save = SaveManager::getInstance().getData();
     const auto& upg = DataManager::getInstance().getUpgrades().at(m_shopUpgradeIds[index]);
     
@@ -217,17 +217,21 @@ void HubState::buyUpgrade(int index) {
         save.solis_sparks -= upg.cost;
         save.unlocked_upgrades.push_back(upg.id);
         SaveManager::getInstance().save();
+        updateUI();
     }
 }
 
-/**
- * @brief Экипировка/снятие навыка. Максимум 3 навыка.
- */
 void HubState::toggleSkill(const std::string& skillId) {
     SaveData& save = SaveManager::getInstance().getData();
     auto it = std::find(save.equipped_skills.begin(), save.equipped_skills.end(), skillId);
-    if (it != save.equipped_skills.end()) save.equipped_skills.erase(it);
-    else if (save.equipped_skills.size() < 3) save.equipped_skills.push_back(skillId);
+    
+    if (it != save.equipped_skills.end()) {
+        save.equipped_skills.erase(it);
+    } else {
+        if (save.equipped_skills.size() < 3) {
+            save.equipped_skills.push_back(skillId);
+        }
+    }
     SaveManager::getInstance().save();
 }
 

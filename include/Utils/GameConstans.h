@@ -16,7 +16,7 @@ namespace constants {
     constexpr float UI_BAR_HEIGHT = 15.0f;
 
     // --- PLAYER BASE STATS ---
-    constexpr int PLAYER_DEFAULT_MAX_HP = 100;
+    constexpr int PLAYER_DEFAULT_MAX_HP = 50;
     constexpr float HEAT_MAX = 100.0f;
     constexpr float HEAT_OVERLOAD_THRESHOLD = 85.0f;
     constexpr float HEAT_DAMAGE_MULT = 0.5f; // Damage per Heat point above threshold

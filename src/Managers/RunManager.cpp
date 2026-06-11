@@ -7,9 +7,6 @@
 
 namespace solis {
 
-/**
- * @brief Синглтон для управления состоянием текущего забега.
- */
 RunManager& RunManager::getInstance() {
     static RunManager instance;
     return instance;
@@ -17,9 +14,6 @@ RunManager& RunManager::getInstance() {
 
 RunManager::RunManager() {}
 
-/**
- * @brief Инициализирует новый забег, применяя все купленные улучшения и выбранные навыки.
- */
 void RunManager::startNewRun() {
     m_currentLevel = 1;
     m_currentRoomIndex = 0;
@@ -27,7 +21,7 @@ void RunManager::startNewRun() {
     const SaveData& save = SaveManager::getInstance().getData();
     m_player = Player();
     
-    // Применение ПАССИВНЫХ бонусов от улучшений Хаба
+    // Применяем ПАССИВНЫЕ улучшения
     int hpBonus = 0;
     float overloadBonus = 0.0f;
     int damageBonus = 0;
@@ -55,14 +49,14 @@ void RunManager::startNewRun() {
     m_player.setEmpathy(save.empathy_level + empathyBonus);
     m_player.setBaseHeatGainMultiplier(heatGainMult);
 
-    // Восстановление открытого Лора для использования в диалогах
+    // Восстанавливаем открытый Лор
     m_unlockedLore = save.unlocked_lore;
     
-    // Экипировка АКТИВНЫХ навыков из Хаба
+    // Экипируем АКТИВНЫЕ навыки
     const auto& skillDb = DataManager::getInstance().getSkills();
     
+    // Если список пуст, даем базовый скилл (Solar Flare)
     if (save.equipped_skills.empty()) {
-        // Если ничего не выбрано — даем базовую вспышку
         if (skillDb.count("skill_solar_flare")) {
             m_player.addSkill(skillDb.at("skill_solar_flare"));
         }
@@ -84,9 +78,6 @@ int RunManager::getTotalSparks() const {
     return SaveManager::getInstance().getData().solis_sparks;
 }
 
-/**
- * @brief Разблокирует новую запись лора в архиве игрока.
- */
 void RunManager::unlockLore(const std::string& id) {
     if (!isLoreUnlocked(id)) {
         m_unlockedLore.push_back(id);
@@ -99,11 +90,9 @@ bool RunManager::isLoreUnlocked(const std::string& id) const {
     return std::find(m_unlockedLore.begin(), m_unlockedLore.end(), id) != m_unlockedLore.end();
 }
 
-/**
- * @brief Увеличивает уровень эмпатии игрока (постоянная характеристика).
- */
 void RunManager::addEmpathy(int amount) {
     m_player.addEmpathy(amount);
+    // Сразу фиксируем в глобальном сохранении
     SaveManager::getInstance().getData().empathy_level = m_player.getEmpathy();
     SaveManager::getInstance().save();
 }
@@ -140,27 +129,20 @@ void RunManager::incrementMercyCounter() {
     SaveManager::getInstance().save();
 }
 
-/**
- * @brief Переход на следующий биом (уровень).
- */
 void RunManager::advanceLevel() {
     m_currentLevel++;
     m_currentRoomIndex = 0;
 }
 
-/**
- * @brief Генерирует варианты комнат для следующего шага игрока.
- * После 12-й комнаты гарантированно выдает босса.
- */
 std::vector<Room> RunManager::getNextRoomOptions() {
-    // Проверка порога для появления босса уровня
-    if (m_currentRoomIndex >= 12) {
+    // Если игрок прошел достаточно комнат (например, 12 для полной версии), генерируем босса
+    if (m_currentRoomIndex >= 2) {
         Room bossRoom;
         bossRoom.id = "room_boss_" + std::to_string(m_currentLevel);
         bossRoom.level = m_currentLevel;
         bossRoom.type = "boss";
         
-        // Определение босса и атмосферного описания для каждого биома
+        // Назначаем босса и уникальное описание в зависимости от уровня
         if (m_currentLevel == 1) {
             bossRoom.possible_enemies = {"boss_libert"};
             bossRoom.preview_text = "Укрепленные врата карцера, из-за двери слышен лязг офицерской стали";
@@ -189,7 +171,6 @@ std::vector<Room> RunManager::getNextRoomOptions() {
         return { bossRoom };
     }
 
-    // Случайная выборка обычных комнат текущего уровня
     const auto& allRooms = DataManager::getInstance().getRooms();
     std::vector<Room> availableRooms;
 
