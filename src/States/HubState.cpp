@@ -34,7 +34,7 @@ void HubState::updateUI() {
 
     // TopBar
     std::stringstream sparksSS;
-    sparksSS << "РОДОВОЙ ОЧАГ | ИСКРЫ: " << save.solis_sparks << " | ЭМПАТИЯ: " << save.empathy_level;
+    sparksSS << "РОДОВОЙ ОЧАГ | ИСКРЫ: " << save.solis_sparks;
     std::string sparksText = sparksSS.str();
     m_topBar->setText(sf::String::fromUtf8(sparksText.begin(), sparksText.end()), font, 24, sf::Color::Yellow);
 
@@ -42,7 +42,7 @@ void HubState::updateUI() {
     std::stringstream as;
 
     if (m_currentMenu == HubMenu::Main) {
-        ss << "Древнее пламя мерцает в центре зала. Вы чувствуете покой и силу предков.\n\n";
+        ss << "Одинокая искра разгорается в блеклой камере, Солис взывает к своему аватару...Что сделаешь ты на этот раз?\n\n";
         ss << "ТЕКУЩИЙ СТАТУС:\n";
         int hpBonus = 0;
         const auto& upgradeDb = DataManager::getInstance().getUpgrades();
@@ -76,11 +76,22 @@ void HubState::updateUI() {
         if (m_shopUpgradeIds.empty()) {
             ss << "Все доступные улучшения приобретены!";
         } else {
-            // УДАЛЕНО ОГРАНИЧЕНИЕ i < 3
-            for (size_t i = 0; i < m_shopUpgradeIds.size(); ++i) {
+            size_t pageSize = 5;
+            size_t start = m_shopPage * pageSize;
+            size_t end = std::min(start + pageSize, m_shopUpgradeIds.size());
+            int maxPage = (int)((m_shopUpgradeIds.size() - 1) / pageSize);
+
+            if (m_shopPage > maxPage) m_shopPage = maxPage;
+
+            for (size_t i = start; i < end; ++i) {
                 const auto& upg = allUpgrades.at(m_shopUpgradeIds[i]);
-                as << "[" << (i+1) << "] " << upg.name << " (" << upg.cost << ") - " << upg.description << "\n";
+                as << "[" << (i - start + 1) << "] " << upg.name << " (" << upg.cost << ")\n    " << upg.description << "\n";
             }
+
+            as << "\n";
+            if (m_shopPage > 0) as << "[8] Пред. страница ";
+            if (end < m_shopUpgradeIds.size()) as << "[9] След. страница";
+            as << "\nСтраница " << (m_shopPage + 1) << " из " << (maxPage + 1);
         }
         as << "\n[0] Назад";
     }
@@ -160,7 +171,18 @@ void HubState::handleInput() {
         }
     } else if (m_currentMenu == HubMenu::Shop) {
         if (num == 0) m_currentMenu = HubMenu::Main;
-        else if (num > 0 && (size_t)num <= m_shopUpgradeIds.size()) buyUpgrade(num - 1);
+        else if (num == 8) { // Prev Page
+            if (m_shopPage > 0) m_shopPage--;
+        }
+        else if (num == 9) { // Next Page
+            size_t pageSize = 5;
+            if ((m_shopPage + 1) * pageSize < m_shopUpgradeIds.size()) m_shopPage++;
+        }
+        else if (num > 0 && num <= 5) {
+            size_t pageSize = 5;
+            size_t actualIndex = m_shopPage * pageSize + (num - 1);
+            if (actualIndex < m_shopUpgradeIds.size()) buyUpgrade((int)actualIndex);
+        }
     } else if (m_currentMenu == HubMenu::Inventory) {
         if (num == 0) m_currentMenu = HubMenu::Main;
         else {
