@@ -6,6 +6,10 @@
 namespace solis {
 namespace constants {
 
+    // --- WINDOW ---
+    constexpr unsigned int WINDOW_WIDTH = 1280;
+    constexpr unsigned int WINDOW_HEIGHT = 720;
+
     // --- UI LAYOUT (Percentages 0.0 to 1.0) ---
     constexpr float UI_TOPBAR_HEIGHT = 0.10f;
     constexpr float UI_MAIN_DISPLAY_HEIGHT = 0.55f;
@@ -20,13 +24,13 @@ namespace constants {
     constexpr float HEAT_MAX = 100.0f;
     constexpr float HEAT_OVERLOAD_THRESHOLD = 85.0f;
     constexpr float HEAT_DAMAGE_MULT = 0.5f; // Damage per Heat point above threshold
-    constexpr float HEAT_DAMAGE_MIN_MULT = 1.0f;
+    constexpr float HEAT_DAMAGE_MIN_MULT = 1.0f; // Multiplier base for Heat calculation
 
     // --- EMPATHY SYSTEM ---
     constexpr int EMPATHY_REWARD_CORRECT = 10;
     constexpr int EMPATHY_REWARD_NEUTRAL = 5;
     constexpr int EMPATHY_REWARD_WRONG = 2;
-    constexpr int EMPATHY_DEFAULT_REVEAL_THRESHOLD = 20;
+    constexpr int EMPATHY_DEFAULT_REVEAL_THRESHOLD = 25; // Taken from TDD 16.2
 
     // --- EXPLORATION & ROOMS ---
     constexpr int MAX_ROOM_OPTIONS = 3;
@@ -38,7 +42,7 @@ namespace constants {
     constexpr int UPGRADE_HP_BONUS = 20;
     constexpr int UPGRADE_HEAT_CAP_COST = 75;
     constexpr float UPGRADE_HEAT_CAP_BONUS = 20.0f;
-    constexpr const char* SAVE_FILE_PATH = "save.json";
+    constexpr const char* SAVE_FILE_PATH = "data/save.json";
 
     // --- COMBAT MANIPULATION ---
     constexpr float MANIP_TAKE_HEAT_GAIN = 15.0f;
@@ -46,6 +50,11 @@ namespace constants {
     constexpr float MANIP_GIVE_HEAT_VENT_PERCENT = 0.20f;
     constexpr float MANIP_GIVE_HEAL_MULT = 0.5f; // Heal per vented heat
     constexpr float MANIP_GIVE_DMG_BUFF = 0.2f;
+
+    // --- BIOME MODIFIERS ---
+    constexpr float LEVEL_2_DEFENSE_BUFF = 0.2f;
+    constexpr float LEVEL_3_HEAT_PENALTY_WRONG_ANSWER = 15.0f;
+    constexpr float LEVEL_4_HEAT_PENALTY_PER_TURN = 10.0f;
 
     // --- COLORS ---
     const sf::Color COLOR_UI_BG_DARK = sf::Color(20, 20, 20);

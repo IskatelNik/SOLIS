@@ -7,6 +7,7 @@
 #include "Utils/GameConstans.h"
 #include <sstream>
 #include <algorithm>
+#include <fstream>
 
 namespace solis {
 
@@ -21,8 +22,18 @@ void HubState::init() {
     const sf::Font& font = ResourceManager::getInstance().getFont("main");
 
     m_topBar = std::make_unique<UIBox>(sf::Vector2f(0,0), sf::Vector2f(w, h * constants::UI_TOPBAR_HEIGHT), constants::COLOR_UI_BG_LIGHT, constants::COLOR_UI_OUTLINE, -2.f);
-    m_mainDisplay = std::make_unique<UIBox>(sf::Vector2f(0, h * constants::UI_TOPBAR_HEIGHT), sf::Vector2f(w, h * constants::UI_MAIN_DISPLAY_HEIGHT), sf::Color::Black, constants::COLOR_UI_OUTLINE, -2.f);
-    m_actionMenu = std::make_unique<UIBox>(sf::Vector2f(0, h * (constants::UI_TOPBAR_HEIGHT + constants::UI_MAIN_DISPLAY_HEIGHT)), sf::Vector2f(w, h * constants::UI_ACTION_MENU_HEIGHT), constants::COLOR_UI_BG_DARK, constants::COLOR_UI_OUTLINE, -2.f);
+    
+    // Main Display: 55% height. Left: 70% width (Log/Dialogue), Right: 30% width (Visual)
+    float mainH = h * constants::UI_MAIN_DISPLAY_HEIGHT;
+    float mainY = h * constants::UI_TOPBAR_HEIGHT;
+    m_mainDisplayLeft = std::make_unique<UIBox>(sf::Vector2f(0, mainY), sf::Vector2f(w * 0.70f, mainH), constants::COLOR_UI_BG_DARK, constants::COLOR_UI_OUTLINE, -2.f);
+    m_mainDisplayRight = std::make_unique<UIBox>(sf::Vector2f(w * 0.70f, mainY), sf::Vector2f(w * 0.30f, mainH), constants::COLOR_UI_BG_DARK, constants::COLOR_UI_OUTLINE, -2.f);
+
+    // Action Menu: 35% height. Left: 70% width (Buttons), Right: 30% width (Player Status)
+    float actionH = h * constants::UI_ACTION_MENU_HEIGHT;
+    float actionY = mainY + mainH;
+    m_actionMenuLeft = std::make_unique<UIBox>(sf::Vector2f(0, actionY), sf::Vector2f(w * 0.70f, actionH), constants::COLOR_UI_BG_LIGHT, constants::COLOR_UI_OUTLINE, -2.f);
+    m_actionMenuRight = std::make_unique<UIBox>(sf::Vector2f(w * 0.70f, actionY), sf::Vector2f(w * 0.30f, actionH), constants::COLOR_UI_BG_LIGHT, constants::COLOR_UI_OUTLINE, -2.f);
 
     m_currentMenu = HubMenu::Main;
     updateUI();
@@ -30,7 +41,19 @@ void HubState::init() {
 
 void HubState::updateUI() {
     const sf::Font& font = ResourceManager::getInstance().getFont("main");
+    const sf::Font& fontAscii = ResourceManager::getInstance().getFont("ascii");
     SaveData& save = SaveManager::getInstance().getData();
+
+    // Загрузка ASCII-арта
+    std::string asciiArt;
+    std::ifstream asciiFile("data/ascii/hearth.txt");
+    if (asciiFile.is_open()) {
+        std::stringstream buffer;
+        buffer << asciiFile.rdbuf();
+        asciiArt = buffer.str();
+    } else {
+        asciiArt = "\n\n  [ASCII АРТ НЕ НАЙДЕН]\n  Положите hearth.txt\n  в data/ascii/";
+    }
 
     // TopBar
     std::stringstream sparksSS;
@@ -38,23 +61,29 @@ void HubState::updateUI() {
     std::string sparksText = sparksSS.str();
     m_topBar->setText(sf::String::fromUtf8(sparksText.begin(), sparksText.end()), font, 24, sf::Color::Yellow);
 
-    std::stringstream ss;
-    std::stringstream as;
+    std::stringstream mainLeft;
+    std::stringstream mainRight;
+    std::stringstream actionLeft;
+    std::stringstream actionRight;
+
+    int maxHp = constants::PLAYER_DEFAULT_MAX_HP + (std::count(save.unlocked_upgrades.begin(), save.unlocked_upgrades.end(), "upgrade_hp_1") * 20);
 
     if (m_currentMenu == HubMenu::Main) {
-        ss << "Древнее пламя мерцает в центре зала. Вы чувствуете покой и силу предков.\n\n";
-        ss << "ТЕКУЩИЙ СТАТУС:\n";
-        ss << "- Макс. HP: " << (constants::PLAYER_DEFAULT_MAX_HP + (std::count(save.unlocked_upgrades.begin(), save.unlocked_upgrades.end(), "upgrade_hp_1") * 20)) << "\n";
-        ss << "- Экипировано навыков: " << save.equipped_skills.size() << "/3\n";
-        ss << "- Знаний в архиве: " << save.unlocked_lore.size();
+        mainLeft << "Древнее пламя мерцает в центре зала. Вы чувствуете покой и силу предков.\n\n";
+        mainLeft << "ТЕКУЩИЙ СТАТУС:\n";
+        mainLeft << "- Макс. HP: " << maxHp << "\n";
+        mainLeft << "- Экипировано навыков: " << save.equipped_skills.size() << "/3\n";
+        mainLeft << "- Знаний в архиве: " << save.unlocked_lore.size();
         
-        as << "[1] НАЧАТЬ ЗАБЕГ\n";
-        as << "[2] МАГАЗИН УЛУЧШЕНИЙ\n";
-        as << "[3] ИНВЕНТАРЬ (НАВЫКИ)\n";
-        as << "[Esc] Выход";
+        mainRight << "\n\n" << asciiArt;
+        
+        actionLeft << "[1] НАЧАТЬ ЗАБЕГ\n";
+        actionLeft << "[2] МАГАЗИН УЛУЧШЕНИЙ\n";
+        actionLeft << "[3] ИНВЕНТАРЬ (НАВЫКИ)\n";
+        actionLeft << "[Esc] Выход";
     } 
     else if (m_currentMenu == HubMenu::Shop) {
-        ss << "МАГАЗИН УЛУЧШЕНИЙ\nТратьте Искры Солис, чтобы усилить свою оболочку.\n\n";
+        mainLeft << "МАГАЗИН УЛУЧШЕНИЙ\nТратьте Искры Солис, чтобы усилить свою оболочку.\n\n";
         
         m_shopUpgradeIds.clear();
         const auto& allUpgrades = DataManager::getInstance().getUpgrades();
@@ -65,28 +94,27 @@ void HubState::updateUI() {
         }
 
         if (m_shopUpgradeIds.empty()) {
-            ss << "Все доступные улучшения приобретены!";
+            mainLeft << "Все доступные улучшения приобретены!";
         } else {
-            // УДАЛЕНО ОГРАНИЧЕНИЕ i < 3
             for (size_t i = 0; i < m_shopUpgradeIds.size(); ++i) {
                 const auto& upg = allUpgrades.at(m_shopUpgradeIds[i]);
-                as << "[" << (i+1) << "] " << upg.name << " (" << upg.cost << ") - " << upg.description << "\n";
+                actionLeft << "[" << (i+1) << "] " << upg.name << " (" << upg.cost << ") - " << upg.description << "\n";
             }
         }
-        as << "\n[0] Назад";
+        actionLeft << "\n[0] Назад";
     }
     else if (m_currentMenu == HubMenu::Inventory) {
-        ss << "ИНВЕНТАРЬ НАВЫКОВ\nВыберите до 3-х активных навыков для следующего забега.\n\n";
+        mainLeft << "ИНВЕНТАРЬ НАВЫКОВ\nВыберите до 3-х активных навыков для следующего забега.\n\n";
         
-        ss << "ЭКИПИРОВАНО:\n";
-        if (save.equipped_skills.empty()) ss << "- Нет\n";
+        mainLeft << "ЭКИПИРОВАНО:\n";
+        if (save.equipped_skills.empty()) mainLeft << "- Нет\n";
         for (const auto& sid : save.equipped_skills) {
             if (DataManager::getInstance().getSkills().count(sid)) {
-                ss << "> " << DataManager::getInstance().getSkills().at(sid).name << "\n";
+                mainLeft << "> " << DataManager::getInstance().getSkills().at(sid).name << "\n";
             }
         }
 
-        ss << "\nДОСТУПНЫЕ НАВЫКИ:\n";
+        mainLeft << "\nДОСТУПНЫЕ НАВЫКИ:\n";
         std::vector<std::string> available;
         available.push_back("skill_solar_flare");
         for (const auto& uid : save.unlocked_upgrades) {
@@ -97,19 +125,28 @@ void HubState::updateUI() {
             }
         }
 
-        // УДАЛЕНО ОГРАНИЧЕНИЕ i < 3
         for (size_t i = 0; i < available.size(); ++i) {
             const auto& skill = DataManager::getInstance().getSkills().at(available[i]);
             bool isEquipped = std::find(save.equipped_skills.begin(), save.equipped_skills.end(), available[i]) != save.equipped_skills.end();
-            as << "[" << (i+1) << "] " << (isEquipped ? "[V] " : "[ ] ") << skill.name << "\n";
+            actionLeft << "[" << (i+1) << "] " << (isEquipped ? "[V] " : "[ ] ") << skill.name << "\n";
         }
-        as << "\n[0] Назад";
+        actionLeft << "\n[0] Назад";
     }
 
-    std::string mainText = ss.str();
-    std::string actionText = as.str();
-    m_mainDisplay->setText(sf::String::fromUtf8(mainText.begin(), mainText.end()), font, 22, sf::Color::White);
-    m_actionMenu->setText(sf::String::fromUtf8(actionText.begin(), actionText.end()), font, 20, sf::Color::Green);
+    actionRight << "СТАТУС:\n";
+    actionRight << "HP: " << maxHp << "/" << maxHp << "\n";
+    actionRight << "HEAT: 0%\n";
+    m_actionMenuRight->setProgressBar(0.0f, constants::COLOR_HEAT_NORMAL);
+
+    std::string mlStr = mainLeft.str();
+    std::string mrStr = mainRight.str();
+    std::string alStr = actionLeft.str();
+    std::string arStr = actionRight.str();
+
+    m_mainDisplayLeft->setText(sf::String::fromUtf8(mlStr.begin(), mlStr.end()), font, 22, sf::Color::White);
+    m_mainDisplayRight->setText(sf::String::fromUtf8(mrStr.begin(), mrStr.end()), fontAscii, 22, sf::Color(200, 100, 50));
+    m_actionMenuLeft->setText(sf::String::fromUtf8(alStr.begin(), alStr.end()), font, 20, sf::Color::Green);
+    m_actionMenuRight->setText(sf::String::fromUtf8(arStr.begin(), arStr.end()), font, 20, sf::Color::White);
 }
 
 void HubState::handleInput() {
@@ -198,8 +235,10 @@ void HubState::update(float deltaTime) {}
 
 void HubState::render(sf::RenderWindow& window) {
     m_topBar->render(window);
-    m_mainDisplay->render(window);
-    m_actionMenu->render(window);
+    m_mainDisplayLeft->render(window);
+    m_mainDisplayRight->render(window);
+    m_actionMenuLeft->render(window);
+    m_actionMenuRight->render(window);
 }
 
 } // namespace solis
