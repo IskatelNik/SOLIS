@@ -1,0 +1,13 @@
+{
+    "blood_counter": 0,
+    "empathy_level": 0,
+    "equipped_skills": [
+        "skill_solar_flare"
+    ],
+    "event_progress": null,
+    "ideology_score": 0,
+    "mercy_counter": 0,
+    "solis_sparks": 0,
+    "unlocked_lore": [],
+    "unlocked_upgrades": []
+}
