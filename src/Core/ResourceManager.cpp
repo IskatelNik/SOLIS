@@ -5,7 +5,7 @@
 namespace solis {
 
 /**
-  Возвращает единственный экземпляр менеджера ресурсов (Singleton).
+ * @brief Возвращает единственный экземпляр менеджера ресурсов (Singleton).
  */
 ResourceManager& ResourceManager::getInstance() {
     static ResourceManager instance;
@@ -13,8 +13,8 @@ ResourceManager& ResourceManager::getInstance() {
 }
 
 /**
-  Загружает шрифт из файла и сохраняет его под указанным именем.
-  true при успешной загрузке.
+ * @brief Загружает шрифт из файла и сохраняет его под указанным именем.
+ * @return true при успешной загрузке.
  */
 bool ResourceManager::loadFont(const std::string& name, const std::string& path) {
     sf::Font font;
@@ -27,8 +27,8 @@ bool ResourceManager::loadFont(const std::string& name, const std::string& path)
 }
 
 /**
-  Возвращает ссылку на загруженный шрифт.
-  std::runtime_error если шрифт с таким именем не найден.
+ * @brief Возвращает ссылку на загруженный шрифт.
+ * @throw std::runtime_error если шрифт с таким именем не найден.
  */
 const sf::Font& ResourceManager::getFont(const std::string& name) const {
     auto it = m_fonts.find(name);

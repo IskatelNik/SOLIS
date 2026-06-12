@@ -8,7 +8,7 @@
 namespace solis {
 
 /**
-  Синглтон для управления состоянием текущего забега.
+ * @brief Синглтон для управления состоянием текущего забега.
  */
 RunManager& RunManager::getInstance() {
     static RunManager instance;
@@ -18,7 +18,7 @@ RunManager& RunManager::getInstance() {
 RunManager::RunManager() {}
 
 /**
-  Инициализирует новый забег, применяя все купленные улучшения и выбранные навыки.
+ * @brief Инициализирует новый забег, применяя все купленные улучшения и выбранные навыки.
  */
 void RunManager::startNewRun() {
     m_currentLevel = 1;
@@ -85,7 +85,7 @@ int RunManager::getTotalSparks() const {
 }
 
 /**
-  Разблокирует новую запись лора в архиве игрока.
+ * @brief Разблокирует новую запись лора в архиве игрока.
  */
 void RunManager::unlockLore(const std::string& id) {
     if (!isLoreUnlocked(id)) {
@@ -100,7 +100,7 @@ bool RunManager::isLoreUnlocked(const std::string& id) const {
 }
 
 /**
-  Увеличивает уровень эмпатии игрока (постоянная характеристика).
+ * @brief Увеличивает уровень эмпатии игрока (постоянная характеристика).
  */
 void RunManager::addEmpathy(int amount) {
     m_player.addEmpathy(amount);
@@ -141,7 +141,7 @@ void RunManager::incrementMercyCounter() {
 }
 
 /**
-  Переход на следующий биом (уровень).
+ * @brief Переход на следующий биом (уровень).
  */
 void RunManager::advanceLevel() {
     m_currentLevel++;
@@ -149,7 +149,7 @@ void RunManager::advanceLevel() {
 }
 
 /**
-  Генерирует варианты комнат для следующего шага игрока.
+ * @brief Генерирует варианты комнат для следующего шага игрока.
  * После 12-й комнаты гарантированно выдает босса.
  */
 std::vector<Room> RunManager::getNextRoomOptions() {

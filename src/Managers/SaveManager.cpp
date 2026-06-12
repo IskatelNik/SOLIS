@@ -6,7 +6,7 @@
 namespace solis {
 
 /**
-  Синглтон для работы с файловой системой и сохранением прогресса.
+ * @brief Синглтон для работы с файловой системой и сохранением прогресса.
  */
 SaveManager& SaveManager::getInstance() {
     static SaveManager instance;
@@ -14,7 +14,7 @@ SaveManager& SaveManager::getInstance() {
 }
 
 /**
-  Загружает данные игрока из JSON-файла. 
+ * @brief Загружает данные игрока из JSON-файла. 
  * Если файл отсутствует — создает новый с начальными параметрами.
  */
 bool SaveManager::load() {
@@ -54,7 +54,7 @@ bool SaveManager::load() {
 }
 
 /**
-  Сериализует текущие данные в JSON и записывает на диск.
+ * @brief Сериализует текущие данные в JSON и записывает на диск.
  */
 bool SaveManager::save() {
     nlohmann::json j;

@@ -4,7 +4,7 @@
 namespace solis {
 
 /**
-  Начальное состояние главного меню (используется как точка входа или отладка).
+ * @brief Начальное состояние главного меню (используется как точка входа или отладка).
  */
 MainMenuState::MainMenuState(sf::RenderWindow& window, StateMachine& stateMachine)
     : m_window(window), m_stateMachine(stateMachine) {}

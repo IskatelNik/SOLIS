@@ -7,7 +7,7 @@ namespace solis {
 Player::Player() {}
 
 /**
-  Наносит урон игроку, уменьшая текущее HP.
+ * @brief Наносит урон игроку, уменьшая текущее HP.
  */
 void Player::takeDamage(int damage) {
     m_currentHp -= damage;
@@ -15,7 +15,7 @@ void Player::takeDamage(int damage) {
 }
 
 /**
-  Восстанавливает здоровье игрока, не превышая максимум.
+ * @brief Восстанавливает здоровье игрока, не превышая максимум.
  */
 void Player::heal(int amount) {
     m_currentHp += amount;
@@ -23,14 +23,14 @@ void Player::heal(int amount) {
 }
 
 /**
-  Увеличивает текущий уровень Жара.
+ * @brief Увеличивает текущий уровень Жара.
  */
 void Player::addHeat(float amount) {
     m_heat += amount;
 }
 
 /**
-  Снижает текущий уровень Жара.
+ * @brief Снижает текущий уровень Жара.
  */
 void Player::reduceHeat(float amount) {
     m_heat -= amount;
@@ -38,14 +38,14 @@ void Player::reduceHeat(float amount) {
 }
 
 /**
-  Рассчитывает итоговое накопление Жара с учетом всех множителей (улучшения + артефакты).
+ * @brief Рассчитывает итоговое накопление Жара с учетом всех множителей (улучшения + артефакты).
  */
 float Player::calculateHeatGain(float baseAmount) const {
     return baseAmount * getHeatGainMultiplier();
 }
 
 /**
-  Возвращает текущий порог перегрузки (базовый + бонусы от артефактов).
+ * @brief Возвращает текущий порог перегрузки (базовый + бонусы от артефактов).
  */
 float Player::getOverloadThreshold() const {
     float threshold = m_baseOverloadThreshold;
@@ -56,7 +56,7 @@ float Player::getOverloadThreshold() const {
 }
 
 /**
-  Возвращает суммарный бонус к базовому урону от всех источников.
+ * @brief Возвращает суммарный бонус к базовому урону от всех источников.
  */
 int Player::getBaseDamageBonus() const {
     int bonus = m_baseDamageBonus;
@@ -67,7 +67,7 @@ int Player::getBaseDamageBonus() const {
 }
 
 /**
-  Возвращает итоговый множитель накопления Жара.
+ * @brief Возвращает итоговый множитель накопления Жара.
  */
 float Player::getHeatGainMultiplier() const {
     float mult = m_baseHeatGainMultiplier;
@@ -78,7 +78,7 @@ float Player::getHeatGainMultiplier() const {
 }
 
 /**
-  Возвращает итоговый множитель защиты (получаемого урона).
+ * @brief Возвращает итоговый множитель защиты (получаемого урона).
  */
 float Player::getDefenseMultiplier() const {
     float mult = 1.0f;
@@ -89,7 +89,7 @@ float Player::getDefenseMultiplier() const {
 }
 
 /**
-  Обновляет длительность активных статусных эффектов (баффы/дебаффы).
+ * @brief Обновляет длительность активных статусных эффектов (баффы/дебаффы).
  */
 void Player::processTurnEffects() {
     for (auto it = m_activeEffects.begin(); it != m_activeEffects.end();) {
@@ -103,8 +103,8 @@ void Player::processTurnEffects() {
 }
 
 /**
-  Случайным образом удаляет один артефакт из инвентаря (механика Тьмы на 3-м уровне).
-  Название удаленного артефакта.
+ * @brief Случайным образом удаляет один артефакт из инвентаря (механика Тьмы на 3-м уровне).
+ * @return Название удаленного артефакта.
  */
 std::string Player::removeRandomArtifact() {
     if (m_artifacts.empty()) return "";

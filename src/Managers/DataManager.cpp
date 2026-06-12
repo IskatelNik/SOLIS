@@ -6,7 +6,7 @@
 namespace solis {
 
 /**
-  Синглтон для доступа к глобальным данным игры.
+ * @brief Синглтон для доступа к глобальным данным игры.
  */
 DataManager& DataManager::getInstance() {
     static DataManager instance;
@@ -14,7 +14,7 @@ DataManager& DataManager::getInstance() {
 }
 
 /**
-  Загружает базу данных комнат из JSON.
+ * @brief Загружает базу данных комнат из JSON.
  */
 bool DataManager::loadRooms(const std::string& filepath) {
     std::ifstream file(filepath);
@@ -50,7 +50,7 @@ bool DataManager::loadRooms(const std::string& filepath) {
 }
 
 /**
-  Загружает шаблоны обычных врагов.
+ * @brief Загружает шаблоны обычных врагов.
  */
 bool DataManager::loadEnemies(const std::string& filepath) {
     std::ifstream file(filepath);
@@ -67,7 +67,7 @@ bool DataManager::loadEnemies(const std::string& filepath) {
 }
 
 /**
-  Загружает шаблоны боссов и их фаз.
+ * @brief Загружает шаблоны боссов и их фаз.
  */
 bool DataManager::loadBosses(const std::string& filepath) {
     std::ifstream file(filepath);
@@ -84,7 +84,7 @@ bool DataManager::loadBosses(const std::string& filepath) {
 }
 
 /**
-  Загружает активные навыки игрока.
+ * @brief Загружает активные навыки игрока.
  */
 bool DataManager::loadSkills(const std::string& filepath) {
     std::ifstream file(filepath);
@@ -118,7 +118,7 @@ bool DataManager::loadSkills(const std::string& filepath) {
 }
 
 /**
-  Загружает записи лора для социальной системы боя.
+ * @brief Загружает записи лора для социальной системы боя.
  */
 bool DataManager::loadLore(const std::string& filepath) {
     std::ifstream file(filepath);
@@ -143,7 +143,7 @@ bool DataManager::loadLore(const std::string& filepath) {
 }
 
 /**
-  Загружает доступные улучшения в Хабе.
+ * @brief Загружает доступные улучшения в Хабе.
  */
 bool DataManager::loadUpgrades(const std::string& filepath) {
     std::ifstream file(filepath);
@@ -169,7 +169,7 @@ bool DataManager::loadUpgrades(const std::string& filepath) {
 }
 
 /**
-  Загружает базу данных артефактов.
+ * @brief Загружает базу данных артефактов.
  */
 bool DataManager::loadArtifacts(const std::string& filepath) {
     std::ifstream file(filepath);
@@ -192,7 +192,7 @@ bool DataManager::loadArtifacts(const std::string& filepath) {
 }
 
 /**
-  Загружает текстовые квесты/события, сгруппированные по уровням.
+ * @brief Загружает текстовые квесты/события, сгруппированные по уровням.
  */
 bool DataManager::loadEvents(const std::string& filepath) {
     std::ifstream file(filepath);
@@ -240,7 +240,7 @@ bool DataManager::loadEvents(const std::string& filepath) {
 }
 
 /**
-  Создает новый экземпляр врага на основе ID шаблона.
+ * @brief Создает новый экземпляр врага на основе ID шаблона.
  */
 std::unique_ptr<Enemy> DataManager::spawnEnemy(const std::string& id) {
     if (m_enemyTemplates.find(id) == m_enemyTemplates.end()) return nullptr;
@@ -275,7 +275,7 @@ std::unique_ptr<Enemy> DataManager::spawnEnemy(const std::string& id) {
 }
 
 /**
-  Создает новый экземпляр босса на основе ID шаблона.
+ * @brief Создает новый экземпляр босса на основе ID шаблона.
  */
 std::unique_ptr<BossEnemy> DataManager::spawnBoss(const std::string& id) {
     if (m_bossTemplates.find(id) == m_bossTemplates.end()) return nullptr;

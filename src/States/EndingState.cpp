@@ -8,7 +8,7 @@
 namespace solis {
 
 /**
-  Состояние финала игры. Выводит эпилог на основе действий игрока в забегах.
+ * @brief Состояние финала игры. Выводит эпилог на основе действий игрока в забегах.
  */
 EndingState::EndingState(sf::RenderWindow& window, StateMachine& stateMachine)
     : m_window(window), m_stateMachine(stateMachine) {}
@@ -25,7 +25,7 @@ void EndingState::init() {
 }
 
 /**
-  Определяет, какой финал заслужил игрок, основываясь на счетчиках крови/милосердия и идеологии.
+ * @brief Определяет, какой финал заслужил игрок, основываясь на счетчиках крови/милосердия и идеологии.
  */
 void EndingState::calculateEnding() {
     const SaveData& save = SaveManager::getInstance().getData();

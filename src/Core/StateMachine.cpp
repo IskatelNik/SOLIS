@@ -3,7 +3,7 @@
 namespace solis {
 
 /**
-  Добавляет новое состояние в стек поверх текущего.
+ * @brief Добавляет новое состояние в стек поверх текущего.
  */
 void StateMachine::pushState(std::unique_ptr<State> newState) {
     m_isAdding = true;
@@ -11,14 +11,14 @@ void StateMachine::pushState(std::unique_ptr<State> newState) {
 }
 
 /**
-  Удаляет текущее активное состояние из стека.
+ * @brief Удаляет текущее активное состояние из стека.
  */
 void StateMachine::popState() {
     m_isRemoving = true;
 }
 
 /**
-  Заменяет текущее активное состояние на новое.
+ * @brief Заменяет текущее активное состояние на новое.
  */
 void StateMachine::changeState(std::unique_ptr<State> newState) {
     m_isAdding = true;
@@ -27,7 +27,7 @@ void StateMachine::changeState(std::unique_ptr<State> newState) {
 }
 
 /**
-  Обрабатывает отложенные изменения состояний.
+ * @brief Обрабатывает отложенные изменения состояний.
  * Вызывается один раз в начале каждого кадра.
  */
 void StateMachine::processStateChanges() {
@@ -55,7 +55,7 @@ void StateMachine::processStateChanges() {
 }
 
 /**
-  Полностью очищает стек и устанавливает новое состояние.
+ * @brief Полностью очищает стек и устанавливает новое состояние.
  * Полезно при возврате в главное меню или перезапуске игры.
  */
 void StateMachine::clearAndSetState(std::unique_ptr<State> newState) {
@@ -72,14 +72,14 @@ void StateMachine::clearAndSetState(std::unique_ptr<State> newState) {
 }
 
 /**
-  Возвращает ссылку на текущее активное состояние.
+ * @brief Возвращает ссылку на текущее активное состояние.
  */
 State& StateMachine::getActiveState() const {
     return *m_states.top();
 }
 
 /**
-  Проверяет, пуст ли стек состояний.
+ * @brief Проверяет, пуст ли стек состояний.
  */
 bool StateMachine::isEmpty() const {
     return m_states.empty();
