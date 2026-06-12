@@ -136,7 +136,7 @@ void RunManager::advanceLevel() {
 
 std::vector<Room> RunManager::getNextRoomOptions() {
     // Если игрок прошел достаточно комнат (например, 12 для полной версии), генерируем босса
-    if (m_currentRoomIndex >= 2) {
+    if (m_currentRoomIndex >= 12) {
         Room bossRoom;
         bossRoom.id = "room_boss_" + std::to_string(m_currentLevel);
         bossRoom.level = m_currentLevel;
