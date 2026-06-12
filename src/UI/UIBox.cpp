@@ -3,7 +3,7 @@
 namespace solis {
 
 /**
- * @brief Конструктор UI-элемента.
+ * Конструктор UI-элемента.
  * @param bgColor Цвет фона.
  * @param outlineColor Цвет рамки.
  * @param outlineThickness Толщина рамки (отрицательная для отрисовки внутрь).
@@ -17,7 +17,7 @@ UIBox::UIBox(sf::Vector2f position, sf::Vector2f size, sf::Color bgColor, sf::Co
 }
 
 /**
- * @brief Устанавливает текст внутри бокса с автоматическим переносом строк.
+ * Устанавливает текст внутри бокса с автоматическим переносом строк.
  */
 void UIBox::setText(const sf::String& text, const sf::Font& font, unsigned int charSize, sf::Color textColor) {
     if (!m_text) {
@@ -33,7 +33,7 @@ void UIBox::setText(const sf::String& text, const sf::Font& font, unsigned int c
 }
 
 /**
- * @brief Алгоритм автоматического переноса текста (Word Wrap).
+ * Алгоритм автоматического переноса текста (Word Wrap).
  * Разбивает длинные строки на части, чтобы они помещались в границы m_shape.
  */
 void UIBox::wrapText(const sf::String& text, const sf::Font& font, unsigned int charSize) {
@@ -82,7 +82,7 @@ void UIBox::wrapText(const sf::String& text, const sf::Font& font, unsigned int 
 }
 
 /**
- * @brief Устанавливает и отображает полосу прогресса (например, для Жара).
+ * Устанавливает и отображает полосу прогресса (например, для Жара).
  * @param percentage Значение от 0.0 до 1.0.
  */
 void UIBox::setProgressBar(float percentage, sf::Color color) {
@@ -95,7 +95,7 @@ void UIBox::setProgressBar(float percentage, sf::Color color) {
 }
 
 /**
- * @brief Отрисовка бокса, рамки, прогресс-бара и текста.
+ * Отрисовка бокса, рамки, прогресс-бара и текста.
  */
 void UIBox::render(sf::RenderWindow& window) {
     window.draw(m_shape);

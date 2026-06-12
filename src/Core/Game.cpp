@@ -10,7 +10,7 @@
 namespace solis {
 
 /**
- * @brief Конструктор главного класса игры.
+ * Конструктор главного класса игры.
  * Инициализирует окно, загружает ресурсы и базы данных, а также устанавливает начальное состояние.
  */
 Game::Game(const std::string& title, unsigned int width, unsigned int height)
@@ -41,7 +41,7 @@ Game::Game(const std::string& title, unsigned int width, unsigned int height)
 }
 
 /**
- * @brief Главный игровой цикл.
+ * Главный игровой цикл.
  * Использует фиксированный временной шаг (Fixed Timestep) для обновления логики.
  */
 void Game::run() {
@@ -75,7 +75,7 @@ void Game::run() {
 }
 
 /**
- * @brief Обработка системных событий окна.
+ * Обработка системных событий окна.
  */
 void Game::processEvents() {
     while (const std::optional event = m_window.pollEvent()) {
@@ -86,7 +86,7 @@ void Game::processEvents() {
 }
 
 /**
- * @brief Очистка окна и рендеринг активного состояния.
+ * Очистка окна и рендеринг активного состояния.
  */
 void Game::render() {
     m_window.clear(sf::Color::Black);

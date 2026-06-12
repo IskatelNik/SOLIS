@@ -5,7 +5,7 @@ namespace solis {
 Enemy::Enemy() {}
 
 /**
- * @brief Наносит урон противнику.
+ * Наносит урон противнику.
  */
 void Enemy::takeDamage(int damage) {
     m_currentHp -= damage;
@@ -13,7 +13,7 @@ void Enemy::takeDamage(int damage) {
 }
 
 /**
- * @brief Обновляет длительность статусных эффектов на враге.
+ * Обновляет длительность статусных эффектов на враге.
  * Вызывается в конце каждого хода боя.
  */
 void Enemy::processTurnEffects() {
