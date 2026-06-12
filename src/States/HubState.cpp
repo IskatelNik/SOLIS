@@ -11,13 +11,13 @@
 namespace solis {
 
 /**
- * @brief Состояние "Родовой Очаг" (Хаб). Место между забегами для прокачки и выбора навыков.
+  Состояние "Родовой Очаг" (Хаб). Место между забегами для прокачки и выбора навыков.
  */
 HubState::HubState(sf::RenderWindow& window, StateMachine& stateMachine)
     : m_window(window), m_stateMachine(stateMachine) {}
 
 /**
- * @brief Инициализация интерфейса Хаба.
+  Инициализация интерфейса Хаба.
  */
 void HubState::init() {
     sf::Vector2u windowSize = m_window.getSize();
@@ -35,7 +35,7 @@ void HubState::init() {
 }
 
 /**
- * @brief Перерисовывает текстовый контент Хаба в зависимости от выбранного подменю.
+  Перерисовывает текстовый контент Хаба в зависимости от выбранного подменю.
  */
 void HubState::updateUI() {
     const sf::Font& font = ResourceManager::getInstance().getFont("main");
@@ -148,7 +148,7 @@ void HubState::updateUI() {
 }
 
 /**
- * @brief Обработка ввода для навигации по меню Хаба.
+  Обработка ввода для навигации по меню Хаба.
  */
 void HubState::handleInput() {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) {
@@ -207,7 +207,7 @@ void HubState::handleInput() {
 }
 
 /**
- * @brief Покупка улучшения.
+  Покупка улучшения.
  */
 void HubState::buyUpgrade(int index) {
     SaveData& save = SaveManager::getInstance().getData();
@@ -221,7 +221,7 @@ void HubState::buyUpgrade(int index) {
 }
 
 /**
- * @brief Экипировка/снятие навыка. Максимум 3 навыка.
+  Экипировка/снятие навыка. Максимум 3 навыка.
  */
 void HubState::toggleSkill(const std::string& skillId) {
     SaveData& save = SaveManager::getInstance().getData();

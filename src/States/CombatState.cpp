@@ -12,15 +12,15 @@
 namespace solis {
 
 /**
- * @brief Конструктор состояния боя.
- * @param enemy Умный указатель на противника (обычный или босс).
+  Конструктор состояния боя.
+  Умный указатель на противника (обычный или босс).
  */
 CombatState::CombatState(sf::RenderWindow& window, StateMachine& stateMachine, std::unique_ptr<Enemy> enemy)
     : m_window(window), m_stateMachine(stateMachine), m_enemy(std::move(enemy)), 
       m_player(RunManager::getInstance().getPlayer()) {}
 
 /**
- * @brief Инициализация интерфейса боя и начальных параметров.
+  Инициализация интерфейса боя и начальных параметров.
  */
 void CombatState::init() {
     sf::Vector2u windowSize = m_window.getSize();
@@ -57,7 +57,7 @@ void CombatState::init() {
 }
 
 /**
- * @brief Добавляет сообщение в боевой лог с автоматической прокруткой.
+  Добавляет сообщение в боевой лог с автоматической прокруткой.
  */
 void CombatState::logMessage(const std::string& msg) {
     m_logs.push_back(msg);
@@ -71,7 +71,7 @@ void CombatState::logMessage(const std::string& msg) {
 }
 
 /**
- * @brief Обновляет текстовое содержимое всех UI-панелей.
+  Обновляет текстовое содержимое всех UI-панелей.
  */
 void CombatState::updateUI() {
     const sf::Font& font = ResourceManager::getInstance().getFont("main");
@@ -149,7 +149,7 @@ void CombatState::updateUI() {
 }
 
 /**
- * @brief Обработка нажатий клавиш в бою.
+  Обработка нажатий клавиш в бою.
  */
 void CombatState::handleInput() {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) m_window.close();
@@ -338,7 +338,7 @@ void CombatState::handleInput() {
 }
 
 /**
- * @brief Обработка завершения хода (DoT-эффекты и кулдауны).
+  Обработка завершения хода (DoT-эффекты и кулдауны).
  */
 void CombatState::processTurnEnd() {
     for (const auto& eff : m_player.getStatusEffects()) {
@@ -366,7 +366,7 @@ void CombatState::processTurnEnd() {
 }
 
 /**
- * @brief Ход противника: расчет и нанесение урона игроку.
+  Ход противника: расчет и нанесение урона игроку.
  */
 void CombatState::enemyTurn() {
     float dmgMult = 1.0f;
@@ -398,7 +398,7 @@ void CombatState::enemyTurn() {
 }
 
 /**
- * @brief Проверка условий завершения боя (победа/поражение).
+  Проверка условий завершения боя (победа/поражение).
  */
 void CombatState::checkEndCombat() {
     if (m_enemy->getCurrentHp() <= 0) {
@@ -442,7 +442,7 @@ void CombatState::checkEndCombat() {
 }
 
 /**
- * @brief Переход к следующему состоянию после окончания боя.
+  Переход к следующему состоянию после окончания боя.
  */
 void CombatState::endCombat(bool victory) {
     if (victory) {

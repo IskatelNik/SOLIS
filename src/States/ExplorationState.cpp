@@ -14,7 +14,7 @@ ExplorationState::ExplorationState(sf::RenderWindow& window, StateMachine& state
     : m_window(window), m_stateMachine(stateMachine) {}
 
 /**
- * @brief Инициализация интерфейса исследования.
+  Инициализация интерфейса исследования.
  */
 void ExplorationState::init() {
     sf::Vector2u windowSize = m_window.getSize();
@@ -32,7 +32,7 @@ void ExplorationState::init() {
 }
 
 /**
- * @brief Генерирует и отображает новые пути для игрока.
+  Генерирует и отображает новые пути для игрока.
  */
 void ExplorationState::generateNextStep() {
     m_currentOptions = RunManager::getInstance().getNextRoomOptions();
@@ -57,7 +57,7 @@ void ExplorationState::generateNextStep() {
 }
 
 /**
- * @brief Обработка выбора пути и взаимодействия с объектами в комнатах.
+  Обработка выбора пути и взаимодействия с объектами в комнатах.
  */
 void ExplorationState::handleInput() {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) m_window.close();

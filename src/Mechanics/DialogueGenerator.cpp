@@ -6,7 +6,7 @@
 namespace solis {
 
 /**
- * @brief Генерирует 3-4 варианта ответа для социальной фазы боя.
+  Генерирует 3-4 варианта ответа для социальной фазы боя.
  * Логика учитывает текущий уровень (биома) и наличие открытого лора.
  */
 std::vector<DialogueGenerator::DialogueOption> DialogueGenerator::generateOptions(Trait enemyTrait, int currentLevel) {
@@ -68,7 +68,7 @@ std::vector<DialogueGenerator::DialogueOption> DialogueGenerator::generateOption
 }
 
 /**
- * @brief Ищет наиболее подходящую реплику для конкретной черты на текущем уровне.
+  Ищет наиболее подходящую реплику для конкретной черты на текущем уровне.
  * Если лор не открыт — возвращает заглушку текущего биома.
  */
 LoreItem DialogueGenerator::getBestLoreForTrait(int traitIndex, int currentLevel, const std::vector<std::string>& unlockedIds) {
@@ -87,7 +87,7 @@ LoreItem DialogueGenerator::getBestLoreForTrait(int traitIndex, int currentLevel
 }
 
 /**
- * @brief Возвращает "неизвестную" реплику (???) для текущего уровня.
+  Возвращает "неизвестную" реплику (???) для текущего уровня.
  */
 LoreItem DialogueGenerator::getPlaceholder(int currentLevel) {
     const auto& allLore = DataManager::getInstance().getLore();
